@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biblioteca Obsidiana Indexada — HTML Único</title>
+<style>
+:root{--bg:#05050a;--panel:#10101b;--text:#f7f2e6;--muted:#aaa4b7;--gold:#f6c94a;--green:#35d486;--blue:#58a6ff;--red:#ff315f;--line:rgba(255,255,255,.13);--shadow:0 22px 70px rgba(0,0,0,.55)}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:radial-gradient(circle at 0 0,rgba(255,49,95,.18),transparent 32%),radial-gradient(circle at 100% 0,rgba(246,201,74,.16),transparent 30%),linear-gradient(180deg,#05050a,#090914 60%,#05050a)}
+header{text-align:center;padding:34px 14px;border-bottom:1px solid var(--line)}h1{font-size:clamp(30px,7vw,68px);margin:0 0 10px;color:var(--gold);letter-spacing:-1.5px}header p{max-width:900px;margin:auto;color:var(--muted);line-height:1.6}
+main{max-width:1240px;margin:auto;padding:18px 12px 60px}.panel,.book,.stat,.store{border:1px solid var(--line);border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.025));box-shadow:var(--shadow)}.panel{padding:16px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:1fr 150px 150px 130px;gap:9px}.grid2{display:grid;grid-template-columns:1fr 150px 130px;gap:9px}
+input,select{width:100%;background:#090913;border:1px solid var(--line);color:var(--text);border-radius:14px;padding:13px;outline:none}button,.btn{border:0;border-radius:14px;padding:12px 14px;font-weight:900;background:var(--gold);color:#090909;text-decoration:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px}button:hover,.btn:hover{filter:brightness(1.05);transform:translateY(-1px)}.ghost{background:#202034;color:var(--text);border:1px solid var(--line)}.blue{background:var(--blue);color:#041221}.green{background:var(--green);color:#04140b}.red{background:var(--red);color:white}.mini{font-size:12px;padding:8px 10px;border-radius:10px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.tab{background:#1b1b2c;color:var(--muted);border:1px solid var(--line)}.tab.active{background:var(--gold);color:#090909}.tabview{display:none}.tabview.active{display:block}
+.notice{border-left:4px solid var(--gold);background:rgba(246,201,74,.08);padding:12px;border-radius:14px;margin-top:12px;line-height:1.5}.status{color:var(--muted);font-size:14px;line-height:1.55;margin-top:10px}.progress{height:12px;background:#080812;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin-top:10px}.bar{height:100%;width:0%;background:var(--green)}
+.books{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.book{padding:12px;display:flex;flex-direction:column}.cover,.no-cover{height:225px;border-radius:16px;background:#090913;border:1px solid var(--line);object-fit:cover;width:100%;margin-bottom:10px}.no-cover{display:flex;align-items:center;justify-content:center;color:#777}.book h3{font-size:16px;line-height:1.25;margin:0 0 8px}.meta{font-size:12.5px;color:var(--muted);line-height:1.45}.desc{font-size:13px;line-height:1.45;max-height:90px;overflow:auto;margin:9px 0}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:auto}.tag{display:inline-flex;border:1px solid var(--line);border-radius:99px;padding:5px 8px;color:var(--muted);font-size:12px;margin:2px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.stat{padding:14px}.stat b{display:block;color:var(--gold);font-size:26px}.azbar{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.azbar button{padding:8px 10px;border-radius:10px}.azbar button.active{background:var(--green);color:#04140b}.stores{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}.store{padding:13px}.store b{color:var(--gold)}.store p{font-size:13px;color:var(--muted)}
+pre{white-space:pre-wrap;background:#080812;border:1px solid var(--line);border-radius:14px;padding:12px;color:var(--muted);max-height:250px;overflow:auto}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:24px}
+@media(max-width:1000px){.books{grid-template-columns:repeat(2,1fr)}.grid,.grid2,.stores,.stats{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.books,.grid,.grid2,.stores,.stats{grid-template-columns:1fr}}
+
+/* BLOQUEIO LOCAL / DEMO PREMIUM */
+.locked main,.locked footer{display:none}
+.authOverlay{position:fixed;inset:0;z-index:99999;background:
+radial-gradient(circle at 0 0,rgba(255,49,95,.22),transparent 32%),
+radial-gradient(circle at 100% 0,rgba(246,201,74,.18),transparent 30%),
+linear-gradient(180deg,#05050a,#090914);display:flex;align-items:center;justify-content:center;padding:18px}
+.authCard{max-width:460px;width:100%;border:1px solid var(--line);border-radius:24px;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03));box-shadow:var(--shadow);padding:22px}
+.authCard h2{margin:0 0 8px;color:var(--gold);font-size:30px}
+.authCard p{color:var(--muted);line-height:1.55}
+.authCard input{margin:7px 0}
+.authError{color:var(--red);font-size:13px;line-height:1.45;min-height:20px}
+.authOk{color:var(--green);font-size:13px}
+.sessionBox{border:1px solid var(--line);background:rgba(255,255,255,.035);border-radius:14px;padding:10px;margin-top:10px;color:var(--muted);font-size:13px}
+.topSession{position:fixed;right:12px;bottom:12px;z-index:20;background:#10101b;border:1px solid var(--line);border-radius:14px;padding:9px 11px;color:var(--muted);font-size:12px;box-shadow:var(--shadow)}
+.topSession button{padding:6px 8px;border-radius:9px;font-size:11px;margin-left:6px}
+
+
+.adminOnly{display:none}
+body.admin-mode .adminOnly{display:inline-flex}
+body.admin-mode #tab-admin{display:none}
+body.admin-mode #tab-admin.tabview.active{display:block}
+body:not(.admin-mode) #tab-admin{display:none!important}
+.adminLoginBox{display:none}
+.adminLoginBox.show{display:block}
+
+
+.adminAccessTop{border:1px solid rgba(255,49,95,.65)!important;background:linear-gradient(180deg,rgba(255,49,95,.18),rgba(255,49,95,.06))!important}
+.adminAccessTop b,.adminAccessTop h3{color:#ff315f}
+.adminBtnRed{background:#ff315f!important;color:#fff!important}
+.adminOnly{display:none}
+body.admin-mode .adminOnly{display:inline-flex}
+body:not(.admin-mode) #tab-admin{display:none!important}
+.secureNote{font-size:12px;color:var(--muted);line-height:1.45;margin-top:6px}
+
+</style>
+</head>
+<body class="locked">
+
+<div id="authOverlay" class="authOverlay">
+  <div class="authCard">
+    <h2>🔐 Biblioteca Obsidiana Premium</h2>
+    <p>Área protegida. Administradores entram sem WhatsApp; usuários entram com e-mail, WhatsApp e senha.</p>
+
+    <div class="sessionBox adminAccessTop">
+      <h3>🛡️ Acesso Admin</h3>
+      <input id="adminOverlayEmail" placeholder="E-mail admin">
+      <input id="adminOverlayPin" type="password" maxlength="4" placeholder="Senha admin">
+      <button id="adminOverlayLoginBtn" class="adminBtnRed">Entrar como admin</button>
+      <div id="adminOverlayStatus" class="authError"></div>
+      <div class="secureNote">Área de administração: criar usuários, renovar contas, adicionar novos admins e exportar backup.</div>
+    </div>
+
+    <div class="sessionBox">
+      <b>👤 Acesso do usuário</b><br>
+      <input id="loginEmail" placeholder="E-mail da conta">
+      <input id="loginWhats" placeholder="WhatsApp cadastrado">
+      <input id="loginKey" type="password" maxlength="4" placeholder="Senha de 4 dígitos">
+      <button id="authLoginBtn">Entrar como usuário</button>
+      <button id="openSignupBtn" class="ghost" style="margin-top:8px">Criar conta grátis 30 dias</button>
+      <div id="authError" class="authError"></div>
+    </div>
+
+    <div id="signupBox" class="sessionBox" style="display:none">
+      <b>Criar conta grátis por 30 dias</b><br>
+      <input id="signupEmail" placeholder="Seu e-mail">
+      <input id="signupWhats" placeholder="Seu WhatsApp">
+      <input id="signupPin" type="password" maxlength="4" placeholder="Crie senha de 4 dígitos">
+      <button id="signupBtn">Cadastrar grátis</button>
+      <div id="signupStatus" class="authError"></div>
+    </div>
+
+    <div class="sessionBox">
+      <b>Suporte / Renovação:</b><br>
+      <a class="btn green mini" target="_blank" href="https://wa.me/558299504461?text=Olá,%20quero%20renovar%20meu%20acesso%20da%20Biblioteca%20Obsidiana.">Falar com admin no WhatsApp</a>
+      <div class="secureNote">Usuários grátis: até 100 autocadastros por 30 dias. Admins podem criar usuários ilimitados.</div>
+    </div>
+  </div>
+</div></div>
+<div id="topSession" class="topSession" style="display:none">
+  <span id="sessionUser">Sessão ativa</span>
+  <button class="ghost" id="logoutBtn">Sair</button>
+</div>
+
+<header>
+<h1>Biblioteca Obsidiana Indexada</h1>
+<p>HTML único com banco local no navegador: paginação automática por APIs, cache local, indexação em IndexedDB, normalização de idiomas e deduplicação avançada.</p>
+</header>
+<main>
+
+<section class="panel">
+<h2>⚙️ Indexar livros no banco local</h2>
+<div class="grid">
+<input id="indexQuery" placeholder="Ex: literatura brasileira, Machado de Assis, Bible, history">
+<select id="indexLang"><option value="">Todos idiomas</option><option value="pt">Português</option><option value="en">Inglês</option><option value="es">Espanhol</option><option value="fr">Francês</option><option value="de">Alemão</option><option value="it">Italiano</option><option value="ja">Japonês</option><option value="zh">Chinês</option></select>
+<select id="maxPages"><option value="1">1 pág/fonte</option><option value="2">2 págs/fonte</option><option value="3">3 págs/fonte</option><option value="5">5 págs/fonte</option><option value="10">10 págs/fonte</option></select>
+<button id="indexBtn">Indexar</button>
+</div>
+<div class="notice">Para HD/PC fraco, comece com 1 pág/fonte. O banco fica salvo no navegador. Se limpar dados do navegador, o índice some.</div>
+<div id="indexStatus" class="status">Pronto para indexar.</div>
+<div class="progress"><div id="bar" class="bar"></div></div>
+</section>
+
+<section class="panel">
+<div class="tabs">
+<button class="tab active" data-tab="search">Buscar no índice</button>
+<button class="tab" data-tab="az">Catálogo A–Z indexado</button>
+<button class="tab" data-tab="stats">Estatísticas</button>
+<button class="tab" data-tab="online">Busca online direta</button>
+<button class="tab" data-tab="prices">Preços</button>
+<button class="tab adminOnly" data-tab="admin">Admin</button>
+</div>
+
+<div id="tab-search" class="tabview active">
+<h2>🔎 Buscar no banco local</h2>
+<div class="grid2">
+<input id="q" placeholder="Título, autor, ISBN, palavra-chave">
+<select id="searchLang"><option value="">Todos</option><option value="pt">Português</option><option value="en">Inglês</option><option value="es">Espanhol</option><option value="fr">Francês</option><option value="de">Alemão</option></select>
+<button id="searchBtn">Buscar</button>
+</div>
+<div id="searchStatus" class="status"></div>
+<div id="results" class="books"></div>
+</div>
+
+<div id="tab-az" class="tabview">
+<h2>📚 Catálogo A–Z do banco local</h2>
+<div id="azbar" class="azbar"></div>
+<div class="grid2">
+<select id="azLang"><option value="">Todos idiomas</option><option value="pt">Português</option><option value="en">Inglês</option><option value="es">Espanhol</option><option value="fr">Francês</option></select>
+<button id="prevAz" class="ghost">Página anterior</button>
+<button id="nextAz">Próxima</button>
+</div>
+<div id="azStatus" class="status"></div>
+<div id="azResults" class="books"></div>
+</div>
+
+<div id="tab-stats" class="tabview">
+<h2>📊 Estatísticas locais</h2>
+<div class="stats" id="statsCards"></div>
+<pre id="statsText"></pre>
+<div class="actions">
+<button class="ghost" id="refreshStats">Atualizar</button>
+<button class="red" id="clearDB">Apagar banco local</button>
+</div>
+</div>
+
+<div id="tab-online" class="tabview">
+<h2>🌍 Busca online direta sem salvar</h2>
+<div class="grid">
+<input id="onlineQ" placeholder="Busca online">
+<select id="onlineSource"><option value="all">Todas principais</option><option value="google">Google Books</option><option value="openlibrary">Open Library</option><option value="gutenberg">Gutenberg</option><option value="internetarchive">Internet Archive</option><option value="openalex">OpenAlex</option></select>
+<select id="onlineLang"><option value="">Todos</option><option value="pt">Português</option><option value="en">Inglês</option><option value="es">Espanhol</option></select>
+<button id="onlineBtn">Buscar</button>
+</div>
+<div id="onlineStatus" class="status"></div>
+<div id="onlineResults" class="books"></div>
+</div>
+
+
+<div id="tab-admin" class="tabview">
+<h2>🛡️ Admin — usuários, admins e cobranças</h2>
+<div class="notice">
+Painel exclusivo para administradores. Usuários comuns não veem esta área. Dados salvos no navegador com criptografia leve. Para venda real e segurança forte, use backend.
+</div>
+
+<div class="grid2">
+<input id="adminSearchInput" placeholder="Buscar cliente/admin por e-mail/WhatsApp">
+<button id="adminExportBtn" class="ghost">Exportar backup</button>
+<button id="adminImportBtn">Importar backup</button>
+</div>
+<input id="adminImportText" placeholder="Cole backup JSON criptografado/descriptografado aqui">
+
+<h3>👤 Criar usuário ilimitado por 30 dias</h3>
+<div class="grid">
+<input id="adminNewEmail" placeholder="E-mail do cliente">
+<input id="adminNewWhats" placeholder="WhatsApp do cliente">
+<input id="adminNewPin" type="password" maxlength="4" placeholder="Senha 4 dígitos">
+<button id="adminCreateUserBtn">Criar usuário</button>
+</div>
+
+<h3>🛡️ Adicionar novo admin</h3>
+<div class="grid2">
+<input id="adminAddEmail" placeholder="E-mail do novo admin">
+<input id="adminAddPin" type="password" maxlength="4" placeholder="Senha admin 4 dígitos">
+<button id="adminAddBtn" class="adminBtnRed">Adicionar admin</button>
+</div>
+
+<h3>🔁 Renovar / redefinir senha de usuário</h3>
+<div class="grid">
+<input id="adminTargetEmail" placeholder="E-mail do usuário">
+<input id="adminResetPin" type="password" maxlength="4" placeholder="Nova senha 4 dígitos">
+<select id="adminRenewDays"><option value="30">+30 dias</option><option value="60">+60 dias</option><option value="90">+90 dias</option><option value="365">+1 ano</option></select>
+<button id="adminRenewBtn">Renovar/Redefinir</button>
+</div>
+
+<div class="grid2" style="margin-top:10px">
+<button id="adminBlockBtn" class="ghost">Bloquear usuário</button>
+<button id="adminUnblockBtn">Desbloquear usuário</button>
+<button id="adminClearBtn" class="red">Limpar banco local</button>
+</div>
+
+<div id="adminStatus" class="status"></div>
+<div class="stats" id="adminCards"></div>
+<pre id="adminTable"></pre>
+</div>
+
+<div id="tab-prices" class="tabview">
+<h2>💰 Preços por links oficiais</h2>
+<div class="grid2">
+<input id="priceQ" placeholder="Título, autor ou ISBN">
+<select id="country"><option value="BR">Brasil</option><option value="GLOBAL">Global</option><option value="US">EUA</option><option value="PT">Portugal</option><option value="ES">Espanha</option></select>
+<button id="priceBtn">Pesquisar</button>
+</div>
+<div id="priceResults" class="stores"></div>
+</div>
+
+</section>
+</main>
+<footer>Biblioteca Obsidiana Indexada — HTML único com IndexedDB.</footer>
+
+<script>
+
+/* ===== AUTENTICAÇÃO LOCAL / SESSÃO ÚNICA DEMO =====
+   IMPORTANTE: em HTML único isso NÃO é segurança real.
+   Usuário avançado pode ver/alterar o código.
+   Para vender de verdade: backend + login + banco + Mercado Pago.
+*/
+const MASTER_ACCESS_KEY = "OBSIDIANA-1990";
+const AUTH_USER_KEY = "bo_auth_user";
+const AUTH_TOKEN_KEY = "bo_auth_token";
+const ACTIVE_SESSION_KEY = "bo_active_session_lock";
+const SESSION_TIMEOUT_MS = 15000;
+const CURRENT_SESSION_ID = "sess_" + Math.random().toString(36).slice(2) + "_" + Date.now();
+
+let sessionHeartbeatTimer = null;
+
+function nowMs(){ return Date.now(); }
+
+async function hashAuth(text){
+  const data = new TextEncoder().encode(text);
+  const buf = await crypto.subtle.digest("SHA-256", data);
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+async function makeToken(email, key){
+  return await hashAuth(email.toLowerCase().trim() + "|" + key + "|biblioteca-obsidiana");
+}
+
+function readActiveSession(){
+  try { return JSON.parse(localStorage.getItem(ACTIVE_SESSION_KEY) || "null"); }
+  catch { return null; }
+}
+
+function writeActiveSession(email){
+  localStorage.setItem(ACTIVE_SESSION_KEY, JSON.stringify({
+    sessionId: CURRENT_SESSION_ID,
+    email,
+    updatedAt: nowMs()
+  }));
+}
+
+function isAnotherSessionActive(email){
+  const s = readActiveSession();
+  if(!s) return false;
+  if(s.email !== email) return false;
+  if(s.sessionId === CURRENT_SESSION_ID) return false;
+  return (nowMs() - Number(s.updatedAt || 0)) < SESSION_TIMEOUT_MS;
+}
+
+function startSessionHeartbeat(email){
+  if(sessionHeartbeatTimer) clearInterval(sessionHeartbeatTimer);
+  writeActiveSession(email);
+  sessionHeartbeatTimer = setInterval(()=>writeActiveSession(email), 4000);
+}
+
+function unlockApp(email){
+  document.body.classList.remove("locked");
+  document.getElementById("authOverlay").style.display = "none";
+  document.getElementById("topSession").style.display = "block";
+  document.getElementById("sessionUser").textContent = "Conta: " + email;
+  startSessionHeartbeat(email);
+}
+
+async function checkSavedAuth(){
+  const email = localStorage.getItem(AUTH_USER_KEY);
+  const token = localStorage.getItem(AUTH_TOKEN_KEY);
+  if(!email || !token) return;
+
+  let allowed = false;
+  const expectedMaster = await makeToken(email, MASTER_ACCESS_KEY);
+  if(token === expectedMaster) allowed = true;
+
+  const access = getAccessDB();
+  const row = access.codes.find(c => (c.email || "").toLowerCase() === email && Date.now() <= Number(c.expiresAt || 0));
+  if(row) allowed = true;
+
+  if(allowed){
+    if(isAnotherSessionActive(email)){
+      document.getElementById("authError").textContent = "Essa conta já está ativa em outra aba/janela deste navegador. Feche a outra sessão ou aguarde alguns segundos.";
+      return;
+    }
+    unlockApp(email);
+  } else {
+    localStorage.removeItem(AUTH_USER_KEY);
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+  }
+}
+
+async function doAuthLogin(){
+  const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+  const key = document.getElementById("loginKey").value.trim();
+  const err = document.getElementById("authError");
+  err.textContent = "";
+  if(!email || !key){ err.textContent = "Digite e-mail e chave/código de acesso."; return; }
+
+  let valid = false;
+  let validBy = "master";
+
+  if(key === MASTER_ACCESS_KEY){
+    valid = true;
+  } else {
+    const access = getAccessDB();
+    const row = access.codes.find(c => c.code === key && (c.email || "").toLowerCase() === email);
+    if(!row){
+      err.textContent = "Código inválido para este e-mail.";
+      return;
+    }
+    if(Date.now() > Number(row.expiresAt || 0)){
+      err.textContent = "Código vencido. Renove o acesso por Pix/cartão para ganhar +30 dias.";
+      return;
+    }
+    row.lastLoginAt = new Date().toISOString();
+    row.status = "ativo";
+    setAccessDB(access);
+    valid = true;
+    validBy = "code";
+  }
+
+  if(!valid){ err.textContent = "Acesso inválido."; return; }
+  if(isAnotherSessionActive(email)){
+    err.textContent = "Acesso bloqueado: já existe uma sessão ativa dessa conta neste navegador.";
+    return;
+  }
+  const token = await makeToken(email, key);
+  localStorage.setItem(AUTH_USER_KEY, email);
+  localStorage.setItem(AUTH_TOKEN_KEY, token);
+  localStorage.setItem("bo_auth_type", validBy);
+  unlockApp(email);
+}
+
+function logoutAuth(){
+  localStorage.removeItem(AUTH_USER_KEY);
+  localStorage.removeItem(AUTH_TOKEN_KEY);
+  const s = readActiveSession();
+  if(s && s.sessionId === CURRENT_SESSION_ID) localStorage.removeItem(ACTIVE_SESSION_KEY);
+  location.reload();
+}
+
+window.addEventListener("storage", ()=>{
+  const email = localStorage.getItem(AUTH_USER_KEY);
+  if(email && isAnotherSessionActive(email)){
+    document.body.classList.add("locked");
+    document.getElementById("authOverlay").style.display = "flex";
+    document.getElementById("topSession").style.display = "none";
+    document.getElementById("authError").textContent = "Sessão encerrada porque outra aba/dispositivo local assumiu a conta.";
+  }
+});
+
+document.addEventListener("DOMContentLoaded", ()=>{
+  document.getElementById("authLoginBtn").onclick = doAuthLogin;
+  document.getElementById("logoutBtn").onclick = logoutAuth;
+  document.getElementById("loginKey").addEventListener("keydown", e=>{ if(e.key==="Enter") doAuthLogin(); });
+  checkSavedAuth();
+});
+/* ===== FIM AUTENTICAÇÃO LOCAL ===== */
+
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const DB_NAME="BibliotecaObsidianaIndexedDB", DB_VERSION=1, STORE_BOOKS="books", STORE_CACHE="cache";
+let db=null, azLetter="A", azPage=1, azPages=1, AZ_SIZE=80;
+
+const LANGUAGE_MAP={por:"pt",pt:"pt","pt-br":"pt",portuguese:"pt","português":"pt",eng:"en",en:"en",english:"en",spa:"es",es:"es",spanish:"es",fre:"fr",fra:"fr",fr:"fr",french:"fr",ger:"de",deu:"de",de:"de",german:"de",ita:"it",it:"it",jpn:"ja",ja:"ja",chi:"zh",zho:"zh",zh:"zh",rus:"ru",ru:"ru",ara:"ar",ar:"ar",kor:"ko",ko:"ko",hin:"hi",hi:"hi"};
+
+function esc(v){return (v||"").toString().replace(/[<>&"]/g,s=>({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[s]))}
+function clean(v){return (v||"").toString().replace(/\s+/g," ").trim()}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+async function sha(text){const data=new TextEncoder().encode(text||"");const buf=await crypto.subtle.digest("SHA-256",data);return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("")}
+function normLang(v){if(!v)return""; if(Array.isArray(v))return [...new Set(v.map(normLang).join(",").split(",").filter(Boolean))].join(","); return [...new Set(String(v).toLowerCase().split(/[,;|\s]+/).map(x=>LANGUAGE_MAP[x]||x.slice(0,2)).filter(Boolean))].join(",")}
+function titleKey(v){return clean(v).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g," ").trim()}
+async function canonicalKey(b){const isbn=clean(b.isbn).split(",")[0].replace(/[^0-9Xx]/g,""); if(isbn)return"isbn:"+isbn.toLowerCase(); const doi=clean(b.doi).toLowerCase(); if(doi)return"doi:"+doi; return"text:"+(await sha(`${titleKey(b.title)}|${titleKey(b.author)}|${b.year||""}`)).slice(0,24)}
+async function normalizeBook(input){
+ const b={title:clean(input.title)||"Sem título",author:clean(input.author)||"Autor desconhecido",publisher:clean(input.publisher),year:clean(input.year),language:normLang(input.language||input.lang),source:clean(input.source),sourceId:clean(input.sourceId),isbn:clean(input.isbn),doi:clean(input.doi),description:clean(input.description||input.desc),cover:input.cover||"",readUrl:input.readUrl||input.read||"",downloadUrl:input.downloadUrl||input.download||"",downloadable:!!input.downloadable,publicDomain:!!input.publicDomain,license:clean(input.license),updatedAt:new Date().toISOString()};
+ b.id=await canonicalKey(b); return b;
+}
+function mergeBooks(a,b){return {...a,title:a.title!="Sem título"?a.title:b.title,author:a.author!="Autor desconhecido"?a.author:b.author,publisher:a.publisher||b.publisher,year:a.year||b.year,language:[...new Set([...(a.language||"").split(","),...(b.language||"").split(",")].filter(Boolean))].join(","),source:[...new Set([...(a.source||"").split(","),...(b.source||"").split(",")].filter(Boolean))].join(","),sourceId:[...new Set([...(a.sourceId||"").split(","),...(b.sourceId||"").split(",")].filter(Boolean))].join(","),isbn:a.isbn||b.isbn,doi:a.doi||b.doi,description:(a.description||"").length>=(b.description||"").length?a.description:b.description,cover:a.cover||b.cover,readUrl:a.readUrl||b.readUrl,downloadUrl:a.downloadUrl||b.downloadUrl,downloadable:a.downloadable||b.downloadable,publicDomain:a.publicDomain||b.publicDomain,license:a.license||b.license,updatedAt:new Date().toISOString()}}
+
+function openDB(){return new Promise((resolve,reject)=>{const req=indexedDB.open(DB_NAME,DB_VERSION);req.onupgradeneeded=e=>{const d=e.target.result;if(!d.objectStoreNames.contains(STORE_BOOKS)){const s=d.createObjectStore(STORE_BOOKS,{keyPath:"id"});s.createIndex("language","language",{unique:false});s.createIndex("title","title",{unique:false})}if(!d.objectStoreNames.contains(STORE_CACHE))d.createObjectStore(STORE_CACHE,{keyPath:"url"})};req.onsuccess=e=>{db=e.target.result;resolve(db)};req.onerror=e=>reject(e.target.error)})}
+function tx(store,mode="readonly"){return db.transaction(store,mode).objectStore(store)}
+function getStore(store,key){return new Promise(r=>{const req=tx(store).get(key);req.onsuccess=()=>r(req.result);req.onerror=()=>r(null)})}
+function putStore(store,val){return new Promise((r,j)=>{const req=tx(store,"readwrite").put(val);req.onsuccess=()=>r();req.onerror=()=>j(req.error)})}
+function allBooks(){return new Promise(r=>{const req=tx(STORE_BOOKS).getAll();req.onsuccess=()=>r(req.result||[]);req.onerror=()=>r([])})}
+function clearStore(store){return new Promise(r=>{const req=tx(store,"readwrite").clear();req.onsuccess=()=>r();req.onerror=()=>r()})}
+async function fetchCached(url){const hit=await getStore(STORE_CACHE,url);const ttl=24*60*60*1000;if(hit&&Date.now()-hit.time<ttl)return hit.data;await sleep(350);const res=await fetch(url);if(!res.ok)throw new Error("HTTP "+res.status);const text=await res.text();let data;try{data=JSON.parse(text)}catch{data=text}await putStore(STORE_CACHE,{url,time:Date.now(),data});return data}
+
+async function fetchGoogle(q,lang,maxPages){let out=[];for(let p=0;p<maxPages;p++){let url=`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=40&startIndex=${p*40}&projection=lite`;if(lang)url+=`&langRestrict=${encodeURIComponent(lang)}`;const d=await fetchCached(url);const items=d.items||[];if(!items.length)break;for(const item of items){const v=item.volumeInfo||{},a=item.accessInfo||{},dl=a.publicDomain?(a.pdf?.downloadLink||a.epub?.downloadLink||""):"";out.push(await normalizeBook({source:"Google Books",sourceId:item.id,title:v.title,author:(v.authors||[]).join(", "),publisher:v.publisher,year:(v.publishedDate||"").slice(0,4),language:v.language,isbn:(v.industryIdentifiers||[]).map(x=>x.identifier).join(", "),description:v.description,cover:v.imageLinks?.thumbnail?.replace("http://","https://"),readUrl:v.previewLink||v.infoLink,downloadUrl:dl,downloadable:!!dl,publicDomain:!!a.publicDomain}))}if(items.length<40)break}return out}
+async function fetchOpenLibrary(q,lang,maxPages){let out=[];for(let p=1;p<=maxPages;p++){let url=`https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=100&page=${p}`;if(lang)url+=`&language=${encodeURIComponent(lang)}`;const d=await fetchCached(url);const docs=d.docs||[];if(!docs.length)break;for(const doc of docs){out.push(await normalizeBook({source:"Open Library",sourceId:doc.key,title:doc.title,author:(doc.author_name||[]).join(", "),publisher:(doc.publisher||[]).slice(0,2).join(", "),year:doc.first_publish_year,language:doc.language,isbn:(doc.isbn||[]).slice(0,5).join(", "),description:"Catálogo mundial. Verifique leitura, empréstimo ou disponibilidade no link oficial.",cover:doc.cover_i?`https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`:"",readUrl:doc.key?`https://openlibrary.org${doc.key}`:"https://openlibrary.org"}))}if(docs.length<100)break}return out}
+async function fetchGutendex(q,lang,maxPages){let out=[],url=`https://gutendex.com/books/?search=${encodeURIComponent(q)}`;if(lang)url+=`&languages=${encodeURIComponent(lang)}`;for(let p=1;p<=maxPages&&url;p++){const d=await fetchCached(url);const results=d.results||[];if(!results.length)break;for(const book of results){const f=book.formats||{},html=f["text/html"]||f["text/html; charset=utf-8"]||"",epub=f["application/epub+zip"]||"",txt=f["text/plain; charset=utf-8"]||f["text/plain"]||"",pdf=f["application/pdf"]||"",dl=epub||pdf||txt||html;out.push(await normalizeBook({source:"Project Gutenberg/Gutendex",sourceId:book.id,title:book.title,author:(book.authors||[]).map(a=>a.name).join(", "),language:book.languages,description:"Livro em domínio público disponível legalmente.",cover:f["image/jpeg"]||"",readUrl:html||txt||`https://www.gutenberg.org/ebooks/${book.id}`,downloadUrl:dl,downloadable:!!dl,publicDomain:true,license:"public-domain"}))}url=d.next}return out}
+async function fetchInternetArchive(q,lang,maxPages){let out=[];for(let p=1;p<=maxPages;p++){const query=`(${q}) AND mediatype:(texts)`;const url=`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier&fl[]=title&fl[]=creator&fl[]=year&fl[]=language&fl[]=licenseurl&rows=100&page=${p}&output=json`;const d=await fetchCached(url);const docs=(d.response||{}).docs||[];if(!docs.length)break;for(const doc of docs){out.push(await normalizeBook({source:"Internet Archive",sourceId:doc.identifier,title:doc.title,author:Array.isArray(doc.creator)?doc.creator.join(", "):doc.creator,year:doc.year,language:doc.language,description:"Acervo do Internet Archive. Verifique leitura, empréstimo ou download no link oficial.",cover:`https://archive.org/services/img/${doc.identifier}`,readUrl:`https://archive.org/details/${doc.identifier}`,license:Array.isArray(doc.licenseurl)?doc.licenseurl.join(", "):doc.licenseurl}))}if(docs.length<100)break}return out}
+async function fetchOpenAlex(q,lang,maxPages){let out=[],cursor="*";for(let p=1;p<=maxPages;p++){const url=`https://api.openalex.org/works?search=${encodeURIComponent(q)}&per-page=100&cursor=${encodeURIComponent(cursor)}`;const d=await fetchCached(url);const results=d.results||[];if(!results.length)break;for(const w of results){out.push(await normalizeBook({source:"OpenAlex",sourceId:w.id,title:w.title,author:(w.authorships||[]).map(a=>a.author?.display_name).filter(Boolean).slice(0,6).join(", "),publisher:w.primary_location?.source?.display_name,year:w.publication_year,language:w.language,doi:w.doi,description:"Metadados acadêmicos do OpenAlex.",readUrl:w.primary_location?.landing_page_url||w.id,downloadUrl:w.open_access?.oa_url||"",downloadable:!!w.open_access?.oa_url,license:w.primary_location?.license||""}))}cursor=d.meta?.next_cursor;if(!cursor)break}return out}
+
+async function saveBooks(list){let added=0,merged=0;for(const b of list){const old=await getStore(STORE_BOOKS,b.id);if(old){await putStore(STORE_BOOKS,mergeBooks(old,b));merged++}else{await putStore(STORE_BOOKS,b);added++}}return{added,merged,total:list.length}}
+async function runIndex(){const q=$("#indexQuery").value.trim()||"literature",lang=$("#indexLang").value,pages=Number($("#maxPages").value);$("#indexBtn").disabled=true;setBar(0);const sources=[["Google",fetchGoogle],["Open Library",fetchOpenLibrary],["Gutenberg",fetchGutendex],["Internet Archive",fetchInternetArchive],["OpenAlex",fetchOpenAlex]];let all=[],done=0;for(const [name,fn] of sources){$("#indexStatus").textContent=`Indexando ${name}...`;try{const books=await fn(q,lang,pages);all=all.concat(books);$("#indexStatus").textContent=`${name}: ${books.length} coletados.`}catch(e){$("#indexStatus").textContent=`Erro em ${name}: ${e.message}`}done++;setBar(done/sources.length*70)}$("#indexStatus").textContent=`Salvando e removendo duplicatas... ${all.length} coletados.`;const saved=await saveBooks(all);setBar(100);$("#indexStatus").textContent=`Finalizado: ${saved.added} novos, ${saved.merged} mesclados, ${saved.total} coletados.`;$("#indexBtn").disabled=false;loadStats()}
+function setBar(v){$("#bar").style.width=Math.max(0,Math.min(100,v))+"%"}
+
+function renderBook(b){return `<article class="book">${b.cover?`<img class="cover" src="${esc(b.cover)}" onerror="this.replaceWith(noCover())">`:`<div class="no-cover">Sem capa</div>`}<h3>${esc(b.title)}</h3><div class="meta"><b>Autor:</b> ${esc(b.author)}<br><b>Idioma:</b> ${esc(b.language||"N/D")}<br><b>Fonte:</b> ${esc(b.source||"N/D")}<br><b>Ano:</b> ${esc(b.year||"N/D")}</div><div class="desc">${esc(b.description||"")}</div><div class="actions">${b.readUrl?`<a class="btn blue mini" target="_blank" href="${esc(b.readUrl)}">Ler</a>`:""}${b.downloadable?`<a class="btn green mini" target="_blank" href="${esc(b.downloadUrl)}">Baixar legal</a>`:`<button class="ghost mini" onclick="alert('Sem download legal nesta obra.')">Sem download</button>`}<button class="mini" onclick='priceFor(${JSON.stringify((b.title+" "+b.author).trim())})'>Preço</button></div></article>`}
+function noCover(){let d=document.createElement("div");d.className="no-cover";d.textContent="Sem capa";return d}
+async function searchLocal(){const q=$("#q").value.trim().toLowerCase(),lang=$("#searchLang").value;let books=await allBooks();if(q)books=books.filter(b=>`${b.title} ${b.author} ${b.publisher} ${b.isbn} ${b.doi} ${b.description}`.toLowerCase().includes(q));if(lang)books=books.filter(b=>(b.language||"").split(",").includes(lang));$("#searchStatus").textContent=`${books.length} encontrados no banco local.`;$("#results").innerHTML=books.slice(0,160).map(renderBook).join("")||"<p class='status'>Nada encontrado. Indexe primeiro.</p>"}
+async function loadStats(){const books=await allBooks();const byLang={},bySource={};for(const b of books){for(const l of (b.language||"unknown").split(",").filter(Boolean))byLang[l]=(byLang[l]||0)+1;for(const s of (b.source||"unknown").split(",").filter(Boolean))bySource[s]=(bySource[s]||0)+1}$("#statsCards").innerHTML=`<div class="stat"><b>${books.length}</b><span>livros indexados</span></div><div class="stat"><b>${Object.keys(byLang).length}</b><span>idiomas</span></div><div class="stat"><b>${byLang.pt||0}</b><span>em português</span></div><div class="stat"><b>${Object.keys(bySource).length}</b><span>fontes</span></div>`;$("#statsText").textContent="Idiomas:\\n"+JSON.stringify(byLang,null,2)+"\\n\\nFontes:\\n"+JSON.stringify(bySource,null,2)}
+function initAZ(){const letters="ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");$("#azbar").innerHTML=letters.map(l=>`<button class="ghost mini" data-letter="${l}">${l}</button>`).join("");$$("#azbar button").forEach(b=>b.onclick=()=>{azLetter=b.dataset.letter;azPage=1;loadAZ()});$("#prevAz").onclick=()=>{azPage=Math.max(1,azPage-1);loadAZ()};$("#nextAz").onclick=()=>{azPage=Math.min(azPages,azPage+1);loadAZ()};$("#azLang").onchange=()=>{azPage=1;loadAZ()}}
+async function loadAZ(){tab("az");$$("#azbar button").forEach(b=>b.classList.toggle("active",b.dataset.letter===azLetter));let books=await allBooks();const lang=$("#azLang").value;if(lang)books=books.filter(b=>(b.language||"").split(",").includes(lang));books=books.filter(b=>(b.title||"").toUpperCase().startsWith(azLetter)).sort((a,b)=>a.title.localeCompare(b.title));azPages=Math.max(1,Math.ceil(books.length/AZ_SIZE));const page=books.slice((azPage-1)*AZ_SIZE,azPage*AZ_SIZE);$("#azStatus").textContent=`Letra ${azLetter}: ${books.length} livros. Página ${azPage}/${azPages}.`;$("#azResults").innerHTML=page.map(renderBook).join("")||"<p class='status'>Nada nesta letra.</p>"}
+
+async function searchOnline(){const q=$("#onlineQ").value.trim();if(!q)return alert("Digite busca.");const lang=$("#onlineLang").value,src=$("#onlineSource").value;$("#onlineStatus").textContent="Buscando online...";let tasks=[];if(src==="all"||src==="google")tasks.push(fetchGoogle(q,lang,1).catch(e=>[]));if(src==="all"||src==="openlibrary")tasks.push(fetchOpenLibrary(q,lang,1).catch(e=>[]));if(src==="all"||src==="gutenberg")tasks.push(fetchGutendex(q,lang,1).catch(e=>[]));if(src==="all"||src==="internetarchive")tasks.push(fetchInternetArchive(q,lang,1).catch(e=>[]));if(src==="all"||src==="openalex")tasks.push(fetchOpenAlex(q,lang,1).catch(e=>[]));const arr=(await Promise.all(tasks)).flat();$("#onlineStatus").textContent=`${arr.length} resultados online.`;$("#onlineResults").innerHTML=arr.slice(0,120).map(renderBook).join("")}
+const stores=[["Google Shopping",q=>`https://www.google.com/search?tbm=shop&q=${encodeURIComponent(q+" livro book")}`,["GLOBAL","BR","US","PT","ES"]],["Amazon Brasil",q=>`https://www.amazon.com.br/s?k=${encodeURIComponent(q)}`,["BR"]],["Amazon Global",q=>`https://www.amazon.com/s?k=${encodeURIComponent(q+" book")}`,["GLOBAL","US"]],["Estante Virtual",q=>`https://www.estantevirtual.com.br/busca?q=${encodeURIComponent(q)}`,["BR"]],["Mercado Livre",q=>`https://lista.mercadolivre.com.br/${encodeURIComponent(q)}`,["BR"]],["BookFinder",q=>`https://www.bookfinder.com/search/?keywords=${encodeURIComponent(q)}`,["GLOBAL","BR","US","PT","ES"]],["AbeBooks",q=>`https://www.abebooks.com/servlet/SearchResults?kn=${encodeURIComponent(q)}`,["GLOBAL","US","PT","ES"]],["Wook Portugal",q=>`https://www.wook.pt/pesquisa/${encodeURIComponent(q)}`,["PT"]]];
+function priceFor(q){$("#priceQ").value=q;tab("prices");priceSearch()}function priceSearch(){const q=$("#priceQ").value.trim();if(!q)return alert("Digite livro.");const c=$("#country").value;const list=stores.filter(s=>s[2].includes(c)||s[2].includes("GLOBAL"));$("#priceResults").innerHTML=list.map(s=>`<div class="store"><b>${esc(s[0])}</b><p>Abre busca oficial. Preço/frete automático precisa API comercial.</p><a class="btn mini" target="_blank" href="${esc(s[1](q))}">Abrir loja</a></div>`).join("")}
+function tab(name){$$(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));$$(".tabview").forEach(v=>v.classList.toggle("active",v.id==="tab-"+name));if(name==="stats")loadStats();if(name==="az")loadAZ();if(name==="admin"){boRenderAdmin&&boRenderAdmin();}}
+$$(".tab").forEach(b=>b.onclick=()=>tab(b.dataset.tab));$("#indexBtn").onclick=runIndex;$("#searchBtn").onclick=searchLocal;$("#refreshStats").onclick=loadStats;$("#clearDB").onclick=async()=>{if(confirm("Apagar todo o banco local?")){await clearStore(STORE_BOOKS);await clearStore(STORE_CACHE);loadStats();$("#results").innerHTML="";}};$("#onlineBtn").onclick=searchOnline;$("#priceBtn").onclick=priceSearch;$("#q").onkeydown=e=>{if(e.key==="Enter")searchLocal()};$("#indexQuery").onkeydown=e=>{if(e.key==="Enter")runIndex()};
+openDB().then(()=>{initAZ();loadStats();});
+
+/* ===== ADMIN LOCAL DE CÓDIGOS 30 DIAS ===== */
+const ADMIN_KEY = "ADMIN-OBSIDIANA";
+const ACCESS_DB_KEY = "bo_access_codes_db";
+
+function getAccessDB(){
+  try {
+    return JSON.parse(localStorage.getItem(ACCESS_DB_KEY) || '{"codes":[]}');
+  } catch {
+    return {codes:[]};
+  }
+}
+
+function setAccessDB(db){
+  localStorage.setItem(ACCESS_DB_KEY, JSON.stringify(db));
+  renderAdmin();
+}
+
+function generateAccessCode(){
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let part = "";
+  for(let i=0;i<12;i++) part += chars[Math.floor(Math.random()*chars.length)];
+  return "OBS-" + part.slice(0,4) + "-" + part.slice(4,8) + "-" + part.slice(8,12);
+}
+
+function addDays(ts, days){
+  return ts + days * 24 * 60 * 60 * 1000;
+}
+
+function checkAdminKey(){
+  return document.getElementById("adminKeyInput") && document.getElementById("adminKeyInput").value.trim() === ADMIN_KEY;
+}
+
+function createAccessCode(){
+  const st = document.getElementById("adminStatus");
+  if(!checkAdminKey()){ st.textContent = "Senha admin inválida."; return; }
+  const email = document.getElementById("newClientEmail").value.trim().toLowerCase();
+  const whats = document.getElementById("newClientWhats").value.trim();
+  if(!email || !whats){ st.textContent = "Informe e-mail e WhatsApp."; return; }
+
+  const db = getAccessDB();
+  const code = generateAccessCode();
+  const createdAt = Date.now();
+  const expiresAt = addDays(createdAt, 30);
+  db.codes.unshift({
+    code,
+    email,
+    whatsapp: whats,
+    createdAt,
+    expiresAt,
+    status: "ativo",
+    paid: true,
+    paymentMethod: "pix/cartao/manual",
+    lastLoginAt: null
+  });
+  setAccessDB(db);
+  st.innerHTML = "Código criado: <b>" + code + "</b> | válido até " + new Date(expiresAt).toLocaleDateString();
+}
+
+function renewAccessCode(){
+  const st = document.getElementById("adminStatus");
+  if(!checkAdminKey()){ st.textContent = "Senha admin inválida."; return; }
+  const code = document.getElementById("renewCodeInput").value.trim();
+  const db = getAccessDB();
+  const row = db.codes.find(c => c.code === code);
+  if(!row){ st.textContent = "Código não encontrado."; return; }
+  const base = Math.max(Date.now(), Number(row.expiresAt || 0));
+  row.expiresAt = addDays(base, 30);
+  row.status = "ativo";
+  row.renewedAt = new Date().toISOString();
+  setAccessDB(db);
+  st.textContent = "Renovado +30 dias até " + new Date(row.expiresAt).toLocaleDateString();
+}
+
+function renderAdmin(){
+  const table = document.getElementById("adminTable");
+  const cards = document.getElementById("adminCards");
+  if(!table || !cards) return;
+  const db = getAccessDB();
+  const now = Date.now();
+  let active = 0, expired = 0;
+  for(const c of db.codes){
+    if(now <= Number(c.expiresAt || 0)) active++;
+    else expired++;
+  }
+  cards.innerHTML = `
+    <div class="stat"><b>${db.codes.length}</b><span>códigos</span></div>
+    <div class="stat"><b>${active}</b><span>ativos</span></div>
+    <div class="stat"><b>${expired}</b><span>vencidos</span></div>
+    <div class="stat"><b>30</b><span>dias por código</span></div>
+  `;
+  table.textContent = db.codes.map(c => {
+    const status = now <= Number(c.expiresAt || 0) ? "ATIVO" : "VENCIDO";
+    return `${status} | ${c.code} | ${c.email} | ${c.whatsapp} | vence: ${new Date(c.expiresAt).toLocaleDateString()} | último login: ${c.lastLoginAt || "-"}`;
+  }).join("\\n") || "Nenhum código criado.";
+}
+
+function exportAdminBackup(){
+  if(!checkAdminKey()){ document.getElementById("adminStatus").textContent = "Senha admin inválida."; return; }
+  const db = getAccessDB();
+  const text = JSON.stringify(db, null, 2);
+  navigator.clipboard?.writeText(text);
+  document.getElementById("adminStatus").textContent = "Backup copiado. Se o navegador bloquear, copie manualmente abaixo.";
+  document.getElementById("adminTable").textContent = text;
+}
+
+function importAdminBackup(){
+  if(!checkAdminKey()){ document.getElementById("adminStatus").textContent = "Senha admin inválida."; return; }
+  const raw = document.getElementById("importAdminText").value.trim();
+  try{
+    const parsed = JSON.parse(raw);
+    if(!Array.isArray(parsed.codes)) throw new Error("JSON sem lista codes.");
+    setAccessDB(parsed);
+    document.getElementById("adminStatus").textContent = "Backup importado.";
+  }catch(e){
+    document.getElementById("adminStatus").textContent = "Erro ao importar: " + e.message;
+  }
+}
+
+function clearAdminDB(){
+  if(!checkAdminKey()){ document.getElementById("adminStatus").textContent = "Senha admin inválida."; return; }
+  if(confirm("Apagar todos os códigos locais?")){
+    localStorage.removeItem(ACCESS_DB_KEY);
+    renderAdmin();
+    document.getElementById("adminStatus").textContent = "Banco admin local apagado.";
+  }
+}
+
+document.addEventListener("DOMContentLoaded", ()=>{
+  const b1 = document.getElementById("createAccessCode");
+  if(b1) b1.onclick = createAccessCode;
+  const b2 = document.getElementById("renewCodeBtn");
+  if(b2) b2.onclick = renewAccessCode;
+  const b3 = document.getElementById("exportAdminBtn");
+  if(b3) b3.onclick = exportAdminBackup;
+  const b4 = document.getElementById("importAdminBtn");
+  if(b4) b4.onclick = importAdminBackup;
+  const b5 = document.getElementById("clearAdminBtn");
+  if(b5) b5.onclick = clearAdminDB;
+  renderAdmin();
+});
+/* ===== FIM ADMIN LOCAL ===== */
+
+
+/* ===== SISTEMA LOCAL DE 100 USUÁRIOS / 30 DIAS / 2 ADMINS =====
+   AVISO: isso é controle local em HTML único. Não é segurança real de servidor.
+   Usuário avançado pode inspecionar o código. Para venda real: backend + banco + pagamento.
+*/
+const BO_ADMINS_FIXED = [
+  { email: "jerbinho1994@gmail.com", pinHash: "8179" },
+  { email: "aliffe22022@gmail.com", pinHash: "9995" }
+];
+const BO_USERS_DB_KEY = "bo_users_30d_db_v2";
+const BO_ADMIN_SESSION_KEY = "bo_admin_session_v2";
+const BO_MAX_FREE_USERS = 100;
+const BO_ACCESS_DAYS = 30;
+
+function boNow(){ return Date.now(); }
+function boDays(ms){ return ms * 24 * 60 * 60 * 1000; }
+
+function boGetDB(){
+  try {
+    const db = JSON.parse(localStorage.getItem(BO_USERS_DB_KEY) || '{"users":[]}');
+    if(!Array.isArray(db.users)) db.users = [];
+    return db;
+  } catch {
+    return { users: [] };
+  }
+}
+
+function boSetDB(db){
+  localStorage.setItem(BO_USERS_DB_KEY, JSON.stringify(db));
+  boRenderAdmin();
+}
+
+function boNormalizeEmail(email){ return (email || "").trim().toLowerCase(); }
+function boNormalizePhone(phone){ return (phone || "").replace(/\D+/g, ""); }
+function boValidPin(pin){ return /^\d{4}$/.test(String(pin || "")); }
+function boIsAdmin(email, pin){
+  email = boNormalizeEmail(email);
+  return BO_ADMINS_FIXED.some(a => a.email === email && a.pinHash === String(pin || ""));
+}
+
+function boUserStatus(u){
+  if(!u) return "inexistente";
+  return boNow() <= Number(u.expiresAt || 0) ? "ativo" : "vencido";
+}
+
+function boFindUser(email, whats){
+  const db = boGetDB();
+  email = boNormalizeEmail(email);
+  const phone = boNormalizePhone(whats);
+  return db.users.find(u => boNormalizeEmail(u.email) === email || (phone && boNormalizePhone(u.whatsapp) === phone));
+}
+
+function boCreateUser(email, whatsapp, pin, createdBy="self"){
+  email = boNormalizeEmail(email);
+  whatsapp = (whatsapp || "").trim();
+  if(!email || !whatsapp) return { ok:false, error:"Informe e-mail e WhatsApp." };
+  if(!boValidPin(pin)) return { ok:false, error:"A senha precisa ter exatamente 4 números." };
+
+  const db = boGetDB();
+  if(db.users.length >= BO_MAX_FREE_USERS && createdBy === "self"){
+    return { ok:false, error:"Limite de 100 usuários grátis atingido. Fale com o admin para liberar acesso." };
+  }
+  if(db.users.some(u => boNormalizeEmail(u.email) === email)){
+    return { ok:false, error:"Este e-mail já está cadastrado." };
+  }
+
+  const now = boNow();
+  const user = {
+    id: "user_" + Math.random().toString(36).slice(2) + "_" + now,
+    email,
+    whatsapp,
+    pin: String(pin),
+    createdAt: now,
+    expiresAt: now + boDays(BO_ACCESS_DAYS),
+    status: "ativo",
+    paid: createdBy !== "self",
+    createdBy,
+    lastLoginAt: null,
+    paymentNote: createdBy === "self" ? "grátis 30 dias" : "criado por admin"
+  };
+  db.users.unshift(user);
+  boSetDB(db);
+  return { ok:true, user };
+}
+
+function boRenewUser(email, newPin, days=30){
+  email = boNormalizeEmail(email);
+  const db = boGetDB();
+  const u = db.users.find(x => boNormalizeEmail(x.email) === email);
+  if(!u) return { ok:false, error:"Usuário não encontrado." };
+  if(newPin && !boValidPin(newPin)) return { ok:false, error:"Nova senha precisa ter 4 números." };
+  if(newPin) u.pin = String(newPin);
+  const base = Math.max(boNow(), Number(u.expiresAt || 0));
+  u.expiresAt = base + boDays(Number(days || 30));
+  u.status = "ativo";
+  u.paid = true;
+  u.renewedAt = boNow();
+  u.paymentNote = "renovado por admin após Pix/cartão/manual";
+  boSetDB(db);
+  return { ok:true, user:u };
+}
+
+function boSetAdminSession(email){
+  localStorage.setItem(BO_ADMIN_SESSION_KEY, JSON.stringify({ email: boNormalizeEmail(email), at: boNow() }));
+}
+
+function boIsAdminSession(){
+  try {
+    const s = JSON.parse(localStorage.getItem(BO_ADMIN_SESSION_KEY) || "null");
+    return s && BO_ADMINS_FIXED.some(a => a.email === s.email);
+  } catch { return false; }
+}
+
+function boPaymentMessage(user){
+  return `Seu acesso de 30 dias venceu. Para renovar por mais 30 dias, fale com o admin pelo WhatsApp/e-mail e efetue pagamento via Pix ou cartão. E-mail cadastrado: ${user.email} | WhatsApp: ${user.whatsapp}`;
+}
+
+/* Override login para usar admin ou usuário 30 dias */
+async function doAuthLogin(){
+  const email = boNormalizeEmail(document.getElementById("loginEmail").value);
+  const whats = document.getElementById("loginWhats") ? document.getElementById("loginWhats").value.trim() : "";
+  const key = document.getElementById("loginKey").value.trim();
+  const err = document.getElementById("authError");
+  err.textContent = "";
+
+  if(!email || !key){ err.textContent = "Digite e-mail e senha."; return; }
+
+  if(boIsAdmin(email, key)){
+    boSetAdminSession(email);
+    const token = await makeToken(email, key);
+    localStorage.setItem(AUTH_USER_KEY, email);
+    localStorage.setItem(AUTH_TOKEN_KEY, token);
+    localStorage.setItem("bo_auth_type", "admin");
+    unlockApp(email + " (admin)");
+    return;
+  }
+
+  const user = boFindUser(email, whats);
+  if(!user || boNormalizeEmail(user.email) !== email){
+    err.textContent = "Usuário não encontrado. Crie conta grátis ou fale com admin.";
+    return;
+  }
+  if(String(user.pin) !== String(key)){
+    err.textContent = "Senha incorreta. Para redefinir senha, fale com o admin informando e-mail e WhatsApp cadastrados.";
+    return;
+  }
+  if(boUserStatus(user) !== "ativo"){
+    err.textContent = boPaymentMessage(user);
+    return;
+  }
+  if(isAnotherSessionActive(email)){
+    err.textContent = "Acesso bloqueado: já existe uma sessão ativa dessa conta neste navegador.";
+    return;
+  }
+
+  const db = boGetDB();
+  const row = db.users.find(u => u.id === user.id);
+  if(row) row.lastLoginAt = boNow();
+  boSetDB(db);
+
+  const token = await makeToken(email, key);
+  localStorage.setItem(AUTH_USER_KEY, email);
+  localStorage.setItem(AUTH_TOKEN_KEY, token);
+  localStorage.setItem("bo_auth_type", "client");
+  unlockApp(email);
+}
+
+/* Override check saved auth: permite sessão salva se usuário ainda ativo */
+async function checkSavedAuth(){
+  const email = boNormalizeEmail(localStorage.getItem(AUTH_USER_KEY));
+  const token = localStorage.getItem(AUTH_TOKEN_KEY);
+  if(!email || !token) return;
+
+  if(BO_ADMINS_FIXED.some(a => a.email === email)){
+    unlockApp(email + " (admin)");
+    return;
+  }
+
+  const user = boFindUser(email, "");
+  if(user && boUserStatus(user) === "ativo"){
+    if(isAnotherSessionActive(email)){
+      document.getElementById("authError").textContent = "Essa conta já está ativa em outra aba/janela deste navegador.";
+      return;
+    }
+    unlockApp(email);
+  } else {
+    localStorage.removeItem(AUTH_USER_KEY);
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+  }
+}
+
+function boOpenSignup(){
+  const box = document.getElementById("signupBox");
+  if(box) box.style.display = box.style.display === "none" ? "block" : "none";
+}
+
+function boSignup(){
+  const email = document.getElementById("signupEmail").value;
+  const whats = document.getElementById("signupWhats").value;
+  const pin = document.getElementById("signupPin").value;
+  const st = document.getElementById("signupStatus");
+  const res = boCreateUser(email, whats, pin, "self");
+  if(!res.ok){ st.textContent = res.error; return; }
+  st.className = "authOk";
+  st.textContent = "Conta criada grátis por 30 dias. Agora faça login com seu e-mail e senha.";
+  document.getElementById("loginEmail").value = boNormalizeEmail(email);
+  document.getElementById("loginWhats").value = whats;
+}
+
+function boAdminLogin(){
+  const email = document.getElementById("adminEmailInput").value;
+  const pin = document.getElementById("adminPinInput").value;
+  const st = document.getElementById("adminStatus");
+  if(!boIsAdmin(email, pin)){ st.textContent = "Admin inválido."; return; }
+  boSetAdminSession(email);
+  st.textContent = "Painel admin liberado.";
+  boRenderAdmin();
+}
+
+function boRequireAdmin(){
+  const st = document.getElementById("adminStatus");
+  if(!boIsAdminSession()){
+    st.textContent = "Faça login admin nesta aba usando e-mail e senha admin.";
+    return false;
+  }
+  return true;
+}
+
+function boAdminCreateUser(){
+  if(!boRequireAdmin()) return;
+  const email = document.getElementById("adminNewEmail").value;
+  const whats = document.getElementById("adminNewWhats").value;
+  const pin = document.getElementById("adminNewPin").value;
+  const res = boCreateUser(email, whats, pin, "admin");
+  document.getElementById("adminStatus").textContent = res.ok ? "Usuário criado por 30 dias: " + res.user.email : res.error;
+}
+
+function boAdminRenew(){
+  if(!boRequireAdmin()) return;
+  const email = document.getElementById("adminTargetEmail").value;
+  const newPin = document.getElementById("adminResetPin").value;
+  const days = document.getElementById("adminRenewDays").value;
+  const res = boRenewUser(email, newPin, days);
+  document.getElementById("adminStatus").textContent = res.ok ? `Renovado até ${new Date(res.user.expiresAt).toLocaleDateString()}.` : res.error;
+}
+
+function boRenderAdmin(){
+  const cards = document.getElementById("adminCards");
+  const table = document.getElementById("adminTable");
+  if(!cards || !table) return;
+  const db = boGetDB();
+  const q = (document.getElementById("adminSearchInput")?.value || "").toLowerCase();
+  const users = db.users.filter(u => !q || `${u.email} ${u.whatsapp}`.toLowerCase().includes(q));
+  const active = db.users.filter(u => boUserStatus(u) === "ativo").length;
+  const expired = db.users.filter(u => boUserStatus(u) === "vencido").length;
+
+  cards.innerHTML = `
+    <div class="stat"><b>${db.users.length}</b><span>usuários</span></div>
+    <div class="stat"><b>${active}</b><span>ativos</span></div>
+    <div class="stat"><b>${expired}</b><span>vencidos</span></div>
+    <div class="stat"><b>${Math.max(0, BO_MAX_FREE_USERS - db.users.length)}</b><span>vagas grátis</span></div>
+  `;
+  table.textContent = users.map(u => {
+    return `${boUserStatus(u).toUpperCase()} | ${u.email} | WhatsApp: ${u.whatsapp} | senha: ${u.pin} | vence: ${new Date(u.expiresAt).toLocaleDateString()} | ${u.paymentNote || ""} | último login: ${u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString() : "-"}`;
+  }).join("\\n") || "Nenhum usuário cadastrado.";
+}
+
+function boAdminExport(){
+  if(!boRequireAdmin()) return;
+  const text = JSON.stringify(boGetDB(), null, 2);
+  navigator.clipboard?.writeText(text);
+  document.getElementById("adminTable").textContent = text;
+  document.getElementById("adminStatus").textContent = "Backup copiado/mostrado abaixo.";
+}
+
+function boAdminImport(){
+  if(!boRequireAdmin()) return;
+  try{
+    const raw = document.getElementById("adminImportText").value.trim();
+    const parsed = JSON.parse(raw);
+    if(!Array.isArray(parsed.users)) throw new Error("JSON sem users.");
+    boSetDB(parsed);
+    document.getElementById("adminStatus").textContent = "Backup importado.";
+  }catch(e){
+    document.getElementById("adminStatus").textContent = "Erro ao importar: " + e.message;
+  }
+}
+
+function boAdminClear(){
+  if(!boRequireAdmin()) return;
+  if(confirm("Apagar todos os usuários locais?")){
+    localStorage.removeItem(BO_USERS_DB_KEY);
+    boRenderAdmin();
+    document.getElementById("adminStatus").textContent = "Usuários locais apagados.";
+  }
+}
+
+/* Rebind após carregar */
+document.addEventListener("DOMContentLoaded", ()=>{
+  const openSignup = document.getElementById("openSignupBtn");
+  if(openSignup) openSignup.onclick = boOpenSignup;
+  const signup = document.getElementById("signupBtn");
+  if(signup) signup.onclick = boSignup;
+
+  const adminLogin = document.getElementById("adminLoginBtn");
+  if(adminLogin) adminLogin.onclick = boAdminLogin;
+  const adminCreate = document.getElementById("adminCreateUserBtn");
+  if(adminCreate) adminCreate.onclick = boAdminCreateUser;
+  const adminRenew = document.getElementById("adminRenewBtn");
+  if(adminRenew) adminRenew.onclick = boAdminRenew;
+  const adminExport = document.getElementById("adminExportBtn");
+  if(adminExport) adminExport.onclick = boAdminExport;
+  const adminImport = document.getElementById("adminImportBtn");
+  if(adminImport) adminImport.onclick = boAdminImport;
+  const adminClear = document.getElementById("adminClearBtn");
+  if(adminClear) adminClear.onclick = boAdminClear;
+  const search = document.getElementById("adminSearchInput");
+  if(search) search.oninput = boRenderAdmin;
+
+  boRenderAdmin();
+});
+/* ===== FIM SISTEMA LOCAL 100 USUÁRIOS ===== */
+
+
+/* ===== CORREÇÃO: ADMIN SEPARADO E OCULTO ===== */
+function setAdminMode(on){
+  if(on) document.body.classList.add("admin-mode");
+  else document.body.classList.remove("admin-mode");
+}
+
+function showAdminTab(){
+  setAdminMode(true);
+  document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(".tabview").forEach(v=>v.classList.remove("active"));
+  const btn = document.querySelector('[data-tab="admin"]');
+  const panel = document.getElementById("tab-admin");
+  if(btn) btn.classList.add("active");
+  if(panel) panel.classList.add("active");
+  if(typeof boRenderAdmin === "function") boRenderAdmin();
+}
+
+function openAdminLoginBox(){
+  const box = document.getElementById("adminLoginBox");
+  if(box) box.classList.toggle("show");
+}
+
+async function doAdminOverlayLogin(){
+  const email = (document.getElementById("adminOverlayEmail").value || "").trim().toLowerCase();
+  const pin = (document.getElementById("adminOverlayPin").value || "").trim();
+  const st = document.getElementById("adminOverlayStatus");
+  st.textContent = "";
+  if(!boIsAdmin(email, pin)){
+    st.textContent = "Admin inválido.";
+    return;
+  }
+  boSetAdminSession(email);
+  const token = await makeToken(email, pin);
+  localStorage.setItem(AUTH_USER_KEY, email);
+  localStorage.setItem(AUTH_TOKEN_KEY, token);
+  localStorage.setItem("bo_auth_type", "admin");
+  unlockApp(email + " (admin)");
+  setAdminMode(true);
+  showAdminTab();
+}
+
+/* Reforça: cliente comum não vê admin */
+const originalUnlockApp = unlockApp;
+unlockApp = function(email){
+  originalUnlockApp(email);
+  const authType = localStorage.getItem("bo_auth_type");
+  const pureEmail = String(email || "").replace(" (admin)","");
+  if(authType === "admin" || BO_ADMINS_FIXED.some(a => a.email === pureEmail)){
+    setAdminMode(true);
+  } else {
+    setAdminMode(false);
+    const adminPanel = document.getElementById("tab-admin");
+    if(adminPanel) adminPanel.classList.remove("active");
+  }
+};
+
+document.addEventListener("DOMContentLoaded", ()=>{
+  const openBtn = document.getElementById("openAdminLoginBtn");
+  if(openBtn) openBtn.onclick = openAdminLoginBox;
+  const loginBtn = document.getElementById("adminOverlayLoginBtn");
+  if(loginBtn) loginBtn.onclick = doAdminOverlayLogin;
+  const pin = document.getElementById("adminOverlayPin");
+  if(pin) pin.addEventListener("keydown", e=>{ if(e.key === "Enter") doAdminOverlayLogin(); });
+
+  // Oculta admin se não for sessão admin
+  const email = (localStorage.getItem(AUTH_USER_KEY) || "").replace(" (admin)","");
+  if(BO_ADMINS_FIXED && BO_ADMINS_FIXED.some(a=>a.email===email)) setAdminMode(true);
+  else setAdminMode(false);
+});
+/* ===== FIM CORREÇÃO ADMIN ===== */
+
+
+/* ===== SISTEMA FINAL ADMIN/USUÁRIOS COM CRIPTOGRAFIA LOCAL =====
+   Importante: em HTML único a criptografia protege os dados salvos no navegador,
+   mas não torna o código inviolável. Segurança real exige backend.
+*/
+const FINAL_SUPPORT_WHATSAPP = "558299504461";
+const FINAL_DB_KEY = "bo_secure_users_admins_v4";
+const FINAL_MAX_FREE_SELF_USERS = 100;
+const FINAL_DAYS_DEFAULT = 30;
+const FINAL_SEED_ADMINS = [
+  { email:"jerbinho1994@gmail.com", pin:"8179", root:true },
+  { email:"aliffe22022@gmail.com", pin:"9995", root:true }
+];
+
+async function finalHash(text){
+  const data = new TextEncoder().encode(String(text || ""));
+  const buf = await crypto.subtle.digest("SHA-256", data);
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+function finalEmail(v){return String(v||"").trim().toLowerCase()}
+function finalPhone(v){return String(v||"").replace(/\D+/g,"")}
+function finalValidPin(v){return /^\d{4}$/.test(String(v||""))}
+function finalDays(n){return Number(n||30)*24*60*60*1000}
+function finalNow(){return Date.now()}
+function finalStatus(u){ if(u.blocked) return "bloqueado"; return finalNow() <= Number(u.expiresAt||0) ? "ativo" : "vencido"; }
+
+async function finalCryptoKey(){
+  const seed = location.hostname + "|biblioteca-obsidiana-local-v4";
+  const material = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(seed));
+  return await crypto.subtle.importKey("raw", material, {name:"AES-GCM"}, false, ["encrypt","decrypt"]);
+}
+function finalB64(buf){return btoa(String.fromCharCode(...new Uint8Array(buf)))}
+function finalFromB64(b64){return Uint8Array.from(atob(b64), c=>c.charCodeAt(0))}
+async function finalEncrypt(obj){
+  const key = await finalCryptoKey();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const data = new TextEncoder().encode(JSON.stringify(obj));
+  const encrypted = await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, data);
+  return JSON.stringify({v:1, iv:finalB64(iv), data:finalB64(encrypted)});
+}
+async function finalDecrypt(raw){
+  const parsed = JSON.parse(raw);
+  if(!parsed.iv || !parsed.data) throw new Error("Backup inválido.");
+  const key = await finalCryptoKey();
+  const plain = await crypto.subtle.decrypt({name:"AES-GCM", iv:finalFromB64(parsed.iv)}, key, finalFromB64(parsed.data));
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+async function finalDefaultDB(){
+  const admins = [];
+  for(const a of FINAL_SEED_ADMINS){
+    admins.push({email:a.email, pinHash:await finalHash(a.pin), root:!!a.root, createdAt:finalNow()});
+  }
+  return {admins, users:[]};
+}
+async function finalGetDB(){
+  const raw = localStorage.getItem(FINAL_DB_KEY);
+  if(!raw){
+    const db = await finalDefaultDB();
+    await finalSetDB(db);
+    return db;
+  }
+  try{
+    return await finalDecrypt(raw);
+  }catch(e){
+    const legacy = localStorage.getItem("bo_users_30d_db_v2");
+    if(legacy){
+      try{
+        const old = JSON.parse(legacy);
+        const db = await finalDefaultDB();
+        db.users = (old.users||[]).map(u=>({
+          id:u.id || "user_"+Math.random().toString(36).slice(2),
+          email:finalEmail(u.email),
+          whatsapp:u.whatsapp||"",
+          pinHash:null,
+          legacyPin:u.pin||"",
+          createdAt:u.createdAt||finalNow(),
+          expiresAt:u.expiresAt||finalNow()+finalDays(30),
+          blocked:false,
+          paid:!!u.paid,
+          createdBy:u.createdBy||"legacy",
+          lastLoginAt:u.lastLoginAt||null,
+          paymentNote:u.paymentNote||"importado"
+        }));
+        await finalSetDB(db);
+        return db;
+      }catch{}
+    }
+    const db = await finalDefaultDB();
+    await finalSetDB(db);
+    return db;
+  }
+}
+async function finalSetDB(db){
+  localStorage.setItem(FINAL_DB_KEY, await finalEncrypt(db));
+  await finalRenderAdmin();
+}
+async function finalFindUser(email, whats=""){
+  const db = await finalGetDB();
+  email = finalEmail(email);
+  const phone = finalPhone(whats);
+  return db.users.find(u => finalEmail(u.email)===email || (phone && finalPhone(u.whatsapp)===phone));
+}
+async function finalIsAdmin(email, pin){
+  email = finalEmail(email);
+  const pinHash = await finalHash(pin);
+  const db = await finalGetDB();
+  return db.admins.some(a => finalEmail(a.email)===email && a.pinHash===pinHash);
+}
+async function finalAddAdmin(email, pin){
+  email = finalEmail(email);
+  if(!email || !finalValidPin(pin)) return {ok:false,error:"Informe e-mail e senha admin com 4 números."};
+  const db = await finalGetDB();
+  if(db.admins.some(a=>finalEmail(a.email)===email)) return {ok:false,error:"Admin já existe."};
+  db.admins.push({email, pinHash:await finalHash(pin), root:false, createdAt:finalNow()});
+  await finalSetDB(db);
+  return {ok:true};
+}
+async function finalCreateUser(email, whats, pin, createdBy="self"){
+  email = finalEmail(email);
+  whats = String(whats||"").trim();
+  if(!email || !whats) return {ok:false,error:"Informe e-mail e WhatsApp."};
+  if(!finalValidPin(pin)) return {ok:false,error:"Senha deve ter 4 números."};
+  const db = await finalGetDB();
+  const selfCount = db.users.filter(u=>u.createdBy==="self").length;
+  if(createdBy==="self" && selfCount >= FINAL_MAX_FREE_SELF_USERS) return {ok:false,error:"Limite de 100 usuários grátis atingido. Fale com o admin."};
+  if(db.users.some(u=>finalEmail(u.email)===email)) return {ok:false,error:"E-mail já cadastrado."};
+  db.users.unshift({
+    id:"user_"+Math.random().toString(36).slice(2)+"_"+finalNow(),
+    email, whatsapp:whats,
+    pinHash:await finalHash(pin),
+    createdAt:finalNow(),
+    activatedAt:finalNow(),
+    expiresAt:finalNow()+finalDays(FINAL_DAYS_DEFAULT),
+    blocked:false,
+    paid:createdBy!=="self",
+    createdBy,
+    lastLoginAt:null,
+    paymentNote:createdBy==="self"?"grátis 30 dias":"criado por admin"
+  });
+  await finalSetDB(db);
+  return {ok:true};
+}
+async function finalRenewUser(email, newPin, days=30){
+  email = finalEmail(email);
+  const db = await finalGetDB();
+  const u = db.users.find(x=>finalEmail(x.email)===email);
+  if(!u) return {ok:false,error:"Usuário não encontrado."};
+  if(newPin){
+    if(!finalValidPin(newPin)) return {ok:false,error:"Nova senha deve ter 4 números."};
+    u.pinHash = await finalHash(newPin);
+    delete u.legacyPin;
+  }
+  const base = Math.max(finalNow(), Number(u.expiresAt||0));
+  u.expiresAt = base + finalDays(days);
+  u.blocked = false;
+  u.paid = true;
+  u.paymentNote = "renovado por admin";
+  u.renewedAt = finalNow();
+  await finalSetDB(db);
+  return {ok:true,user:u};
+}
+async function finalBlockUser(email, block=true){
+  email = finalEmail(email);
+  const db = await finalGetDB();
+  const u = db.users.find(x=>finalEmail(x.email)===email);
+  if(!u) return {ok:false,error:"Usuário não encontrado."};
+  u.blocked = !!block;
+  await finalSetDB(db);
+  return {ok:true};
+}
+function finalSetAdminMode(on){
+  if(on) document.body.classList.add("admin-mode");
+  else document.body.classList.remove("admin-mode");
+}
+function finalShowAdmin(){
+  finalSetAdminMode(true);
+  document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(".tabview").forEach(v=>v.classList.remove("active"));
+  const btn = document.querySelector('[data-tab="admin"]');
+  const pane = document.getElementById("tab-admin");
+  if(btn) btn.classList.add("active");
+  if(pane) pane.classList.add("active");
+  finalRenderAdmin();
+}
+function finalSupportMessage(user){
+  const text = encodeURIComponent(`Olá, meu acesso da Biblioteca Obsidiana venceu. Quero renovar. E-mail: ${user.email} WhatsApp: ${user.whatsapp}`);
+  return `Seu acesso venceu. Fale com o admin no WhatsApp para renovar: https://wa.me/${FINAL_SUPPORT_WHATSAPP}?text=${text}`;
+}
+
+/* substitui login admin */
+async function doAdminOverlayLogin(){
+  const email = finalEmail(document.getElementById("adminOverlayEmail")?.value);
+  const pin = document.getElementById("adminOverlayPin")?.value || "";
+  const st = document.getElementById("adminOverlayStatus");
+  if(st) st.textContent = "";
+  if(!(await finalIsAdmin(email,pin))){
+    if(st) st.textContent = "Admin inválido.";
+    return;
+  }
+  localStorage.setItem(AUTH_USER_KEY,email);
+  localStorage.setItem(AUTH_TOKEN_KEY,await makeToken(email,pin));
+  localStorage.setItem("bo_auth_type","admin");
+  unlockApp(email+" (admin)");
+  finalSetAdminMode(true);
+  finalShowAdmin();
+}
+
+/* substitui login usuário */
+async function doAuthLogin(){
+  const email = finalEmail(document.getElementById("loginEmail")?.value);
+  const whats = document.getElementById("loginWhats")?.value || "";
+  const pin = document.getElementById("loginKey")?.value || "";
+  const err = document.getElementById("authError");
+  if(err) err.textContent = "";
+  const user = await finalFindUser(email, whats);
+  if(!user || finalEmail(user.email)!==email){
+    if(err) err.textContent = "Usuário não encontrado. Crie conta grátis ou fale com admin.";
+    return;
+  }
+  const okPin = user.pinHash ? (await finalHash(pin))===user.pinHash : String(user.legacyPin||"")===String(pin);
+  if(!okPin){
+    if(err) err.textContent = "Senha incorreta. Fale com admin para redefinir usando e-mail e WhatsApp.";
+    return;
+  }
+  const status = finalStatus(user);
+  if(status==="bloqueado"){
+    if(err) err.textContent = "Usuário bloqueado. Fale com o admin.";
+    return;
+  }
+  if(status==="vencido"){
+    if(err) err.textContent = finalSupportMessage(user);
+    return;
+  }
+  if(isAnotherSessionActive(email)){
+    if(err) err.textContent = "Acesso bloqueado: já existe sessão ativa.";
+    return;
+  }
+  const db = await finalGetDB();
+  const row = db.users.find(u=>u.id===user.id);
+  if(row) row.lastLoginAt = finalNow();
+  await finalSetDB(db);
+  localStorage.setItem(AUTH_USER_KEY,email);
+  localStorage.setItem(AUTH_TOKEN_KEY,await makeToken(email,pin));
+  localStorage.setItem("bo_auth_type","client");
+  unlockApp(email);
+  finalSetAdminMode(false);
+}
+
+/* substitui cadastro grátis */
+async function boSignup(){
+  const email = document.getElementById("signupEmail")?.value;
+  const whats = document.getElementById("signupWhats")?.value;
+  const pin = document.getElementById("signupPin")?.value;
+  const st = document.getElementById("signupStatus");
+  const res = await finalCreateUser(email, whats, pin, "self");
+  if(st){
+    st.className = res.ok ? "authOk" : "authError";
+    st.textContent = res.ok ? "Conta criada grátis por 30 dias. Agora faça login." : res.error;
+  }
+  if(res.ok){
+    document.getElementById("loginEmail").value = finalEmail(email);
+    document.getElementById("loginWhats").value = whats;
+  }
+}
+async function checkSavedAuth(){
+  const email = finalEmail(localStorage.getItem(AUTH_USER_KEY));
+  if(!email) return;
+  if(localStorage.getItem("bo_auth_type")==="admin"){
+    finalSetAdminMode(true);
+    unlockApp(email+" (admin)");
+    return;
+  }
+  const user = await finalFindUser(email,"");
+  if(user && finalStatus(user)==="ativo"){
+    unlockApp(email);
+    finalSetAdminMode(false);
+  }else{
+    localStorage.removeItem(AUTH_USER_KEY);
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+  }
+}
+
+/* admin actions */
+async function finalAdminCreate(){
+  const res = await finalCreateUser(
+    document.getElementById("adminNewEmail").value,
+    document.getElementById("adminNewWhats").value,
+    document.getElementById("adminNewPin").value,
+    "admin"
+  );
+  document.getElementById("adminStatus").textContent = res.ok ? "Usuário criado com prazo inicial de 30 dias." : res.error;
+}
+async function finalAdminAdd(){
+  const res = await finalAddAdmin(document.getElementById("adminAddEmail").value, document.getElementById("adminAddPin").value);
+  document.getElementById("adminStatus").textContent = res.ok ? "Novo admin adicionado." : res.error;
+}
+async function finalAdminRenew(){
+  const res = await finalRenewUser(
+    document.getElementById("adminTargetEmail").value,
+    document.getElementById("adminResetPin").value,
+    document.getElementById("adminRenewDays").value
+  );
+  document.getElementById("adminStatus").textContent = res.ok ? "Usuário renovado/redefinido." : res.error;
+}
+async function finalAdminBlock(){ const res = await finalBlockUser(document.getElementById("adminTargetEmail").value,true); document.getElementById("adminStatus").textContent = res.ok ? "Usuário bloqueado." : res.error; }
+async function finalAdminUnblock(){ const res = await finalBlockUser(document.getElementById("adminTargetEmail").value,false); document.getElementById("adminStatus").textContent = res.ok ? "Usuário desbloqueado." : res.error; }
+async function finalAdminExport(){
+  const raw = localStorage.getItem(FINAL_DB_KEY) || "";
+  navigator.clipboard?.writeText(raw);
+  document.getElementById("adminTable").textContent = raw;
+  document.getElementById("adminStatus").textContent = "Backup criptografado copiado/mostrado abaixo.";
+}
+async function finalAdminImport(){
+  const raw = document.getElementById("adminImportText").value.trim();
+  try{
+    const test = await finalDecrypt(raw);
+    if(!Array.isArray(test.users) || !Array.isArray(test.admins)) throw new Error("backup inválido");
+    localStorage.setItem(FINAL_DB_KEY, raw);
+    await finalRenderAdmin();
+    document.getElementById("adminStatus").textContent = "Backup importado.";
+  }catch(e){
+    document.getElementById("adminStatus").textContent = "Erro ao importar: " + e.message;
+  }
+}
+async function finalAdminClear(){
+  if(confirm("Apagar usuários e admins adicionados? Os admins iniciais serão recriados.")){
+    localStorage.removeItem(FINAL_DB_KEY);
+    await finalGetDB();
+    await finalRenderAdmin();
+    document.getElementById("adminStatus").textContent = "Banco local reiniciado.";
+  }
+}
+async function finalRenderAdmin(){
+  const cards = document.getElementById("adminCards");
+  const table = document.getElementById("adminTable");
+  if(!cards || !table) return;
+  const db = await finalGetDB();
+  const q = String(document.getElementById("adminSearchInput")?.value || "").toLowerCase();
+  const users = db.users.filter(u=>!q || `${u.email} ${u.whatsapp}`.toLowerCase().includes(q));
+  const active = db.users.filter(u=>finalStatus(u)==="ativo").length;
+  const expired = db.users.filter(u=>finalStatus(u)==="vencido").length;
+  const blocked = db.users.filter(u=>finalStatus(u)==="bloqueado").length;
+  cards.innerHTML = `
+    <div class="stat"><b>${db.users.length}</b><span>usuários</span></div>
+    <div class="stat"><b>${active}</b><span>ativos</span></div>
+    <div class="stat"><b>${expired}</b><span>vencidos</span></div>
+    <div class="stat"><b>${db.admins.length}</b><span>admins</span></div>
+  `;
+  const adminsText = db.admins.map(a=>`ADMIN | ${a.email} | ${a.root?"inicial":"adicionado"}`).join("\\n");
+  const usersText = users.map(u=>`${finalStatus(u).toUpperCase()} | ${u.email} | WhatsApp: ${u.whatsapp} | vence: ${new Date(u.expiresAt).toLocaleDateString()} | ${u.paymentNote||""} | último login: ${u.lastLoginAt?new Date(u.lastLoginAt).toLocaleString():"-"}`).join("\\n");
+  table.textContent = `ADMINISTRADORES\\n${adminsText || "-"}\\n\\nUSUÁRIOS\\n${usersText || "Nenhum usuário."}`;
+}
+
+/* rebind final */
+document.addEventListener("DOMContentLoaded", ()=>{
+  const adminLogin = document.getElementById("adminOverlayLoginBtn");
+  if(adminLogin) adminLogin.onclick = doAdminOverlayLogin;
+  const userLogin = document.getElementById("authLoginBtn");
+  if(userLogin) userLogin.onclick = doAuthLogin;
+  const signup = document.getElementById("signupBtn");
+  if(signup) signup.onclick = boSignup;
+  const openSignup = document.getElementById("openSignupBtn");
+  if(openSignup) openSignup.onclick = function(){ const b=document.getElementById("signupBox"); if(b)b.style.display=b.style.display==="none"?"block":"none"; };
+
+  const create = document.getElementById("adminCreateUserBtn");
+  if(create) create.onclick = finalAdminCreate;
+  const add = document.getElementById("adminAddBtn");
+  if(add) add.onclick = finalAdminAdd;
+  const renew = document.getElementById("adminRenewBtn");
+  if(renew) renew.onclick = finalAdminRenew;
+  const block = document.getElementById("adminBlockBtn");
+  if(block) block.onclick = finalAdminBlock;
+  const unblock = document.getElementById("adminUnblockBtn");
+  if(unblock) unblock.onclick = finalAdminUnblock;
+  const exp = document.getElementById("adminExportBtn");
+  if(exp) exp.onclick = finalAdminExport;
+  const imp = document.getElementById("adminImportBtn");
+  if(imp) imp.onclick = finalAdminImport;
+  const clear = document.getElementById("adminClearBtn");
+  if(clear) clear.onclick = finalAdminClear;
+  const s = document.getElementById("adminSearchInput");
+  if(s) s.oninput = finalRenderAdmin;
+  finalGetDB().then(finalRenderAdmin);
+});
+/* ===== FIM SISTEMA FINAL ===== */
+
+</script>
+</body>
+</html>
