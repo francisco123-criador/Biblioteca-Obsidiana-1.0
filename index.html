@@ -3281,146 +3281,184 @@ Se aparecer permissão negada, sua conta ainda não está como admin no Supabase
 
 <!-- ===== CORREÇÃO FINAL V2.4.3 — CADASTRO/PAGAMENTO + CRÉDITOS ===== -->
 <style>
-.boCreatorCredit{
+.creditos-fj-chatgpt{
+  display:block;
   width:100%;
-  margin:10px 0 14px;
+  margin:12px 0;
   padding:10px 12px;
   border:2px solid #ff315f;
   border-radius:14px;
-  background:rgba(255,49,95,.13);
+  background:rgba(255,49,95,.14);
   color:#ff315f!important;
   font-weight:900;
-  font-size:14px;
-  line-height:1.35;
+  font-size:15px;
   text-align:center;
-  text-transform:uppercase;
-  letter-spacing:.3px;
-  box-shadow:0 8px 25px rgba(255,49,95,.18);
+  letter-spacing:.2px;
+  text-shadow:0 0 12px rgba(255,49,95,.35);
 }
-.boCreatorCredit small{
-  color:#ffb3c3!important;
-  font-weight:800;
-  text-transform:none;
-}
+.authCard .creditos-fj-chatgpt{margin-top:0;margin-bottom:14px}
+footer .creditos-fj-chatgpt{max-width:900px;margin:12px auto}
 </style>
 <script>
 (function(){
-  const CREDIT_TEXT = "Criado por Francisco Jerbesson de Freitas Morais e ChatGPT 5";
-  const API_FINAL = window.BACKEND_URL || "https://backend-biblioteca-obsidiana.onrender.com";
-  const SESSION_KEY_FINAL = "bo_online_session_v2";
+  const API_FIX = "https://backend-biblioteca-obsidiana.onrender.com";
+  const SESSION_KEY_FIX = "bo_online_session_v2";
+  const AUTH_USER_KEY_FIX = "bo_auth_user";
+  const AUTH_TOKEN_KEY_FIX = "bo_auth_token";
 
-  function getSessionFinal(){
-    try { return JSON.parse(localStorage.getItem(SESSION_KEY_FINAL) || "null"); }
-    catch { return null; }
-  }
-  function setSessionFinal(s){ localStorage.setItem(SESSION_KEY_FINAL, JSON.stringify(s)); }
-  function authHeadersFinal(){
-    const s = getSessionFinal();
-    return s?.token ? { "Authorization": "Bearer " + s.token } : {};
-  }
-  async function apiFinal(path, body={}, method="POST"){
-    const res = await fetch(API_FINAL + path, {
+  function getEl(id){ return document.getElementById(id); }
+  function normEmail(v){ return String(v || "").trim().toLowerCase(); }
+  function validPin(v){ return /^\d{4}$/.test(String(v || "")); }
+  async function apiFix(path, body={}, method="POST"){
+    const session = JSON.parse(localStorage.getItem(SESSION_KEY_FIX) || "null");
+    const headers = { "Content-Type":"application/json" };
+    if(session && session.token) headers.Authorization = "Bearer " + session.token;
+    const res = await fetch(API_FIX + path, {
       method,
-      headers:{ "Content-Type":"application/json", ...authHeadersFinal() },
+      headers,
       body: method === "GET" ? undefined : JSON.stringify(body)
     });
     const data = await res.json().catch(()=>({}));
     if(!res.ok || data.ok === false) throw new Error(data.error || "Erro no servidor.");
     return data;
   }
-
-  function injectCreatorCredits(){
-    document.querySelectorAll(".boCreatorCredit").forEach(el=>el.remove());
-    const html = `<div class="boCreatorCredit">${CREDIT_TEXT}<br><small>Biblioteca Obsidiana</small></div>`;
-
-    const header = document.querySelector("header");
-    if(header) header.insertAdjacentHTML("beforeend", html);
-
-    const authCard = document.querySelector(".authCard");
-    if(authCard) authCard.insertAdjacentHTML("afterbegin", html);
-
-    document.querySelectorAll(".tabview").forEach(tab=>{
-      tab.insertAdjacentHTML("afterbegin", html);
-    });
-
-    const footer = document.querySelector("footer");
-    if(footer) footer.innerHTML = `<div class="boCreatorCredit">${CREDIT_TEXT}</div>` + footer.innerHTML;
+  function setOnlineSession(profile, token){
+    if(!profile || !profile.email) return;
+    localStorage.setItem(SESSION_KEY_FIX, JSON.stringify({
+      token: token || "",
+      email: profile.email,
+      role: profile.role || "user",
+      profile
+    }));
+    localStorage.setItem(AUTH_USER_KEY_FIX, profile.email);
+    if(token) localStorage.setItem(AUTH_TOKEN_KEY_FIX, token);
+    localStorage.setItem("bo_auth_type", profile.role === "admin" ? "admin" : "client");
   }
-
-  async function payNowFixed(email, days=30, whatsapp="", pin=""){
-    const targetEmail = (email || document.getElementById("signupEmail")?.value || document.getElementById("loginEmail")?.value || "").trim().toLowerCase();
-    const targetWhats = (whatsapp || document.getElementById("signupWhats")?.value || document.getElementById("loginWhats")?.value || "").trim();
-    const targetPin = (pin || document.getElementById("signupPin")?.value || document.getElementById("loginKey")?.value || "").trim();
-    if(!targetEmail){ alert("Digite seu e-mail primeiro."); return; }
-
-    const data = await apiFinal("/create-preference", {
-      userEmail: targetEmail,
-      planDays: Number(days || 30),
-      whatsapp: targetWhats,
-      pin: targetPin
+  function isActiveProfileFix(p){
+    if(!p) return false;
+    if(p.role === "admin" || p.is_lifetime) return true;
+    if(p.status !== "active") return false;
+    return !!p.expires_at && new Date(p.expires_at).getTime() > Date.now();
+  }
+  async function payNowFix(email, days=30, whatsapp="", pin=""){
+    const userEmail = normEmail(email || getEl("signupEmail")?.value || getEl("loginEmail")?.value);
+    const userWhats = String(whatsapp || getEl("signupWhats")?.value || getEl("loginWhats")?.value || "").trim();
+    const userPin = String(pin || getEl("signupPin")?.value || getEl("loginKey")?.value || "").trim();
+    if(!userEmail) throw new Error("Digite seu e-mail primeiro.");
+    const data = await apiFix("/create-preference", {
+      userEmail,
+      planDays:Number(days || 30),
+      whatsapp:userWhats,
+      pin:userPin
     });
     const url = data.init_point || data.sandbox_init_point;
-    if(!url) throw new Error("Mercado Pago não retornou link.");
+    if(!url) throw new Error("Mercado Pago não retornou link de pagamento.");
     location.href = url;
   }
-  window.boPayNow = payNowFixed;
 
-  async function boSignupFixed(){
-    const email = (document.getElementById("signupEmail")?.value || "").trim().toLowerCase();
-    const whatsapp = (document.getElementById("signupWhats")?.value || "").trim();
-    const pin = (document.getElementById("signupPin")?.value || "").trim();
-    const st = document.getElementById("signupStatus");
+  async function signupFix(){
+    const email = normEmail(getEl("signupEmail")?.value);
+    const whatsapp = String(getEl("signupWhats")?.value || "").trim();
+    const pin = String(getEl("signupPin")?.value || "").trim();
+    const st = getEl("signupStatus");
     if(st){ st.className="authError"; st.textContent=""; }
-
     try{
-      const data = await apiFinal("/signup", { email, whatsapp, pin });
+      if(!email || !email.includes("@")) throw new Error("E-mail inválido.");
+      if(!validPin(pin)) throw new Error("A senha precisa ter 4 números.");
+      const data = await apiFix("/signup", { email, whatsapp, pin });
 
-      if(data.profile && data.token){
-        setSessionFinal({ token:data.token, email:data.profile.email, role:data.profile.role, profile:data.profile });
-        localStorage.setItem("bo_auth_user", data.profile.email);
-        localStorage.setItem("bo_auth_type", data.profile.role === "admin" ? "admin" : "client");
-        if(document.getElementById("loginEmail")) document.getElementById("loginEmail").value = data.profile.email;
-        if(document.getElementById("loginWhats")) document.getElementById("loginWhats").value = whatsapp;
-        if(st){
-          st.className="authOk";
-          st.textContent = data.freePromoGranted
-            ? "Conta criada com acesso grátis promocional. Entrando..."
-            : `Conta criada. Você ganhou 30 dias grátis${data.freeTrialNumber ? " — vaga " + data.freeTrialNumber + "/100" : ""}. Entrando...`;
-        }
+      if(data.profile && data.profile.email){
+        setOnlineSession(data.profile, data.token);
+        if(st){ st.className="authOk"; st.textContent="Conta grátis criada com sucesso. Entrando..."; }
         if(typeof unlockApp === "function") unlockApp(data.profile.email);
+        document.body.classList.toggle("admin-mode", data.profile.role === "admin");
         return;
       }
 
       if(data.paymentRequired){
-        if(st){
-          st.className="authError";
-          st.innerHTML = `
-            <div>${data.message || "Os acessos grátis acabaram. Continue para o pagamento."}</div>
-            <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:8px">
-              <button class="green mini" type="button" onclick="boPayNow('${email}',30,'${whatsapp.replace(/'/g,"\\'")}','${pin.replace(/'/g,"\\'")}')">30 dias — pagar agora</button>
-              <button class="mini" type="button" onclick="boPayNow('${email}',60,'${whatsapp.replace(/'/g,"\\'")}','${pin.replace(/'/g,"\\'")}')">60 dias</button>
-              <button class="mini" type="button" onclick="boPayNow('${email}',90,'${whatsapp.replace(/'/g,"\\'")}','${pin.replace(/'/g,"\\'")}')">90 dias</button>
-            </div>
-            <div class="secureNote">A conta paga será criada somente depois que o Mercado Pago aprovar e o webhook confirmar.</div>
-          `;
+        if(st){ st.className="authOk"; st.textContent="As vagas grátis acabaram. Abrindo pagamento seguro..."; }
+        await payNowFix(email, 30, whatsapp, pin);
+        return;
+      }
+
+      throw new Error(data.message || "Resposta inesperada do cadastro. Tente novamente.");
+    }catch(e){
+      if(st){ st.className="authError"; st.textContent=e.message || String(e); }
+      else alert(e.message || String(e));
+    }
+  }
+
+  async function loginFix(){
+    const email = normEmail(getEl("loginEmail")?.value);
+    const whatsapp = String(getEl("loginWhats")?.value || "").trim();
+    const pin = String(getEl("loginKey")?.value || "").trim();
+    const err = getEl("authError");
+    if(err) err.textContent = "";
+    try{
+      if(!email || !pin) throw new Error("Digite e-mail e senha.");
+      const data = await apiFix("/login", { email, whatsapp, pin });
+      if(!data.profile || !data.profile.email){
+        throw new Error(data.error || "Login não retornou perfil. Faça pagamento ou tente novamente.");
+      }
+      setOnlineSession(data.profile, data.token);
+
+      if(data.profile.role === "admin"){
+        if(typeof unlockApp === "function") unlockApp(data.profile.email + " (admin)");
+        if(typeof showAdminTab === "function") showAdminTab();
+        return;
+      }
+
+      if(!isActiveProfileFix(data.profile)){
+        if(err){
+          err.innerHTML = '<div>Acesso vencido ou inativo.</div><div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:8px"><button class="green mini" onclick="boPayNow(\''+data.profile.email+'\',30)">30 dias</button><button class="mini" onclick="boPayNow(\''+data.profile.email+'\',60)">60 dias</button><button class="mini" onclick="boPayNow(\''+data.profile.email+'\',90)">90 dias</button></div>';
         }
         return;
       }
 
-      if(st) st.textContent = data.message || "Resposta recebida, mas nenhum perfil foi criado.";
+      document.body.classList.remove("admin-mode");
+      if(typeof unlockApp === "function") unlockApp(data.profile.email);
     }catch(e){
-      if(st) st.textContent = e.message;
+      if(err) err.textContent = e.message || String(e);
     }
   }
-  window.boSignup = boSignupFixed;
 
-  document.addEventListener("DOMContentLoaded", ()=>{
-    injectCreatorCredits();
-    const signupBtn = document.getElementById("signupBtn");
-    if(signupBtn) signupBtn.onclick = boSignupFixed;
-    const signupPin = document.getElementById("signupPin");
-    if(signupPin) signupPin.onkeydown = e => { if(e.key === "Enter") boSignupFixed(); };
-  });
+  function insertCredits(){
+    const text = "Criado por Francisco Jerbesson de Freitas Morais e ChatGPT 5";
+    const make = () => {
+      const d = document.createElement("div");
+      d.className = "creditos-fj-chatgpt";
+      d.textContent = text;
+      return d;
+    };
+    const authCard = document.querySelector(".authCard");
+    if(authCard && !authCard.querySelector(".creditos-fj-chatgpt")) authCard.insertBefore(make(), authCard.firstChild);
+    document.querySelectorAll(".tabview").forEach(tab => {
+      if(!tab.querySelector(":scope > .creditos-fj-chatgpt")) tab.insertBefore(make(), tab.firstChild);
+    });
+    const header = document.querySelector("header");
+    if(header && !header.querySelector(".creditos-fj-chatgpt")) header.appendChild(make());
+    const footer = document.querySelector("footer");
+    if(footer && !footer.querySelector(".creditos-fj-chatgpt")) footer.appendChild(make());
+  }
+
+  function bindFix(){
+    window.boPayNow = payNowFix;
+    window.premiumSignupAutoLogin = signupFix;
+    window.boSignup = signupFix;
+    window.doAuthLogin = loginFix;
+    const signupBtn = getEl("signupBtn");
+    if(signupBtn){ signupBtn.onclick = signupFix; signupBtn.textContent = "Cadastrar / Continuar"; }
+    const loginBtn = getEl("authLoginBtn");
+    if(loginBtn) loginBtn.onclick = loginFix;
+    const sp = getEl("signupPin");
+    if(sp) sp.onkeydown = e => { if(e.key === "Enter") signupFix(); };
+    const lk = getEl("loginKey");
+    if(lk) lk.onkeydown = e => { if(e.key === "Enter") loginFix(); };
+    insertCredits();
+  }
+
+  document.addEventListener("DOMContentLoaded", () => { bindFix(); setTimeout(bindFix, 300); setTimeout(bindFix, 1200); });
+  window.addEventListener("load", () => { bindFix(); setTimeout(bindFix, 500); });
 })();
 </script>
 <!-- ===== FIM CORREÇÃO FINAL V2.4.3 ===== -->
