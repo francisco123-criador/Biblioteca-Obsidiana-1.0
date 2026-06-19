@@ -161,7 +161,7 @@ Não coloque SUPABASE_SERVICE_ROLE_KEY no HTML.
 
     <div class="sessionBox">
       <b>Suporte / Renovação:</b><br>
-      <a class="btn green mini" target="_blank" href="https://wa.me/5584997012535?text=Olá,%20quero%20renovar%20meu%20acesso%20da%20Biblioteca%20Obsidiana.">Falar com admin no WhatsApp</a>
+      <a class="btn green mini" target="_blank" href="https://wa.me/558299504461?text=Olá,%20quero%20renovar%20meu%20acesso%20da%20Biblioteca%20Obsidiana.">Falar com admin no WhatsApp</a>
       <div class="secureNote">Usuários grátis: somente os primeiros 100 recebem 30 dias. Após isso, novas contas continuam apenas com planos pagos via Mercado Pago.</div>
     </div>
   </div>
@@ -3276,6 +3276,154 @@ Se aparecer permissão negada, sua conta ainda não está como admin no Supabase
   window.updateFreeSignupUI = updateFreeSignupUI;
 })();
 </script>
+
+
+
+<!-- ===== CORREÇÃO FINAL V2.4.3 — CADASTRO/PAGAMENTO + CRÉDITOS ===== -->
+<style>
+.boCreatorCredit{
+  width:100%;
+  margin:10px 0 14px;
+  padding:10px 12px;
+  border:2px solid #ff315f;
+  border-radius:14px;
+  background:rgba(255,49,95,.13);
+  color:#ff315f!important;
+  font-weight:900;
+  font-size:14px;
+  line-height:1.35;
+  text-align:center;
+  text-transform:uppercase;
+  letter-spacing:.3px;
+  box-shadow:0 8px 25px rgba(255,49,95,.18);
+}
+.boCreatorCredit small{
+  color:#ffb3c3!important;
+  font-weight:800;
+  text-transform:none;
+}
+</style>
+<script>
+(function(){
+  const CREDIT_TEXT = "Criado por Francisco Jerbesson de Freitas Morais e ChatGPT 5";
+  const API_FINAL = window.BACKEND_URL || "https://backend-biblioteca-obsidiana.onrender.com";
+  const SESSION_KEY_FINAL = "bo_online_session_v2";
+
+  function getSessionFinal(){
+    try { return JSON.parse(localStorage.getItem(SESSION_KEY_FINAL) || "null"); }
+    catch { return null; }
+  }
+  function setSessionFinal(s){ localStorage.setItem(SESSION_KEY_FINAL, JSON.stringify(s)); }
+  function authHeadersFinal(){
+    const s = getSessionFinal();
+    return s?.token ? { "Authorization": "Bearer " + s.token } : {};
+  }
+  async function apiFinal(path, body={}, method="POST"){
+    const res = await fetch(API_FINAL + path, {
+      method,
+      headers:{ "Content-Type":"application/json", ...authHeadersFinal() },
+      body: method === "GET" ? undefined : JSON.stringify(body)
+    });
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok || data.ok === false) throw new Error(data.error || "Erro no servidor.");
+    return data;
+  }
+
+  function injectCreatorCredits(){
+    document.querySelectorAll(".boCreatorCredit").forEach(el=>el.remove());
+    const html = `<div class="boCreatorCredit">${CREDIT_TEXT}<br><small>Biblioteca Obsidiana</small></div>`;
+
+    const header = document.querySelector("header");
+    if(header) header.insertAdjacentHTML("beforeend", html);
+
+    const authCard = document.querySelector(".authCard");
+    if(authCard) authCard.insertAdjacentHTML("afterbegin", html);
+
+    document.querySelectorAll(".tabview").forEach(tab=>{
+      tab.insertAdjacentHTML("afterbegin", html);
+    });
+
+    const footer = document.querySelector("footer");
+    if(footer) footer.innerHTML = `<div class="boCreatorCredit">${CREDIT_TEXT}</div>` + footer.innerHTML;
+  }
+
+  async function payNowFixed(email, days=30, whatsapp="", pin=""){
+    const targetEmail = (email || document.getElementById("signupEmail")?.value || document.getElementById("loginEmail")?.value || "").trim().toLowerCase();
+    const targetWhats = (whatsapp || document.getElementById("signupWhats")?.value || document.getElementById("loginWhats")?.value || "").trim();
+    const targetPin = (pin || document.getElementById("signupPin")?.value || document.getElementById("loginKey")?.value || "").trim();
+    if(!targetEmail){ alert("Digite seu e-mail primeiro."); return; }
+
+    const data = await apiFinal("/create-preference", {
+      userEmail: targetEmail,
+      planDays: Number(days || 30),
+      whatsapp: targetWhats,
+      pin: targetPin
+    });
+    const url = data.init_point || data.sandbox_init_point;
+    if(!url) throw new Error("Mercado Pago não retornou link.");
+    location.href = url;
+  }
+  window.boPayNow = payNowFixed;
+
+  async function boSignupFixed(){
+    const email = (document.getElementById("signupEmail")?.value || "").trim().toLowerCase();
+    const whatsapp = (document.getElementById("signupWhats")?.value || "").trim();
+    const pin = (document.getElementById("signupPin")?.value || "").trim();
+    const st = document.getElementById("signupStatus");
+    if(st){ st.className="authError"; st.textContent=""; }
+
+    try{
+      const data = await apiFinal("/signup", { email, whatsapp, pin });
+
+      if(data.profile && data.token){
+        setSessionFinal({ token:data.token, email:data.profile.email, role:data.profile.role, profile:data.profile });
+        localStorage.setItem("bo_auth_user", data.profile.email);
+        localStorage.setItem("bo_auth_type", data.profile.role === "admin" ? "admin" : "client");
+        if(document.getElementById("loginEmail")) document.getElementById("loginEmail").value = data.profile.email;
+        if(document.getElementById("loginWhats")) document.getElementById("loginWhats").value = whatsapp;
+        if(st){
+          st.className="authOk";
+          st.textContent = data.freePromoGranted
+            ? "Conta criada com acesso grátis promocional. Entrando..."
+            : `Conta criada. Você ganhou 30 dias grátis${data.freeTrialNumber ? " — vaga " + data.freeTrialNumber + "/100" : ""}. Entrando...`;
+        }
+        if(typeof unlockApp === "function") unlockApp(data.profile.email);
+        return;
+      }
+
+      if(data.paymentRequired){
+        if(st){
+          st.className="authError";
+          st.innerHTML = `
+            <div>${data.message || "Os acessos grátis acabaram. Continue para o pagamento."}</div>
+            <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:8px">
+              <button class="green mini" type="button" onclick="boPayNow('${email}',30,'${whatsapp.replace(/'/g,"\\'")}','${pin.replace(/'/g,"\\'")}')">30 dias — pagar agora</button>
+              <button class="mini" type="button" onclick="boPayNow('${email}',60,'${whatsapp.replace(/'/g,"\\'")}','${pin.replace(/'/g,"\\'")}')">60 dias</button>
+              <button class="mini" type="button" onclick="boPayNow('${email}',90,'${whatsapp.replace(/'/g,"\\'")}','${pin.replace(/'/g,"\\'")}')">90 dias</button>
+            </div>
+            <div class="secureNote">A conta paga será criada somente depois que o Mercado Pago aprovar e o webhook confirmar.</div>
+          `;
+        }
+        return;
+      }
+
+      if(st) st.textContent = data.message || "Resposta recebida, mas nenhum perfil foi criado.";
+    }catch(e){
+      if(st) st.textContent = e.message;
+    }
+  }
+  window.boSignup = boSignupFixed;
+
+  document.addEventListener("DOMContentLoaded", ()=>{
+    injectCreatorCredits();
+    const signupBtn = document.getElementById("signupBtn");
+    if(signupBtn) signupBtn.onclick = boSignupFixed;
+    const signupPin = document.getElementById("signupPin");
+    if(signupPin) signupPin.onkeydown = e => { if(e.key === "Enter") boSignupFixed(); };
+  });
+})();
+</script>
+<!-- ===== FIM CORREÇÃO FINAL V2.4.3 ===== -->
 
 </body>
 </html>
